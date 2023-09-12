@@ -8,7 +8,7 @@ from django.db import models
 
 class Newspapers(models.Model):
     id = models.IntegerField(primary_key=True)
-    name = models.TextField(unique=True, null=False)
+    name = models.TextField(unique=True, null=False,)
     min_date = models.DateField()
     max_date = models.DateField()
         
@@ -18,7 +18,7 @@ class Newspapers(models.Model):
     
 class Articles(models.Model):
     id = models.IntegerField(primary_key=True)
-    newspaper_id = models.ForeignKey("ws.newspapers", on_delete=models.CASCADE)
+    newspaper = models.ForeignKey(Newspapers, on_delete=models.CASCADE) # newspaper_id
     title = models.TextField(null=False)
     url = models.TextField()
     description = models.TextField()

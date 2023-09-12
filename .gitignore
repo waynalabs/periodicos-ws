@@ -1,0 +1,13 @@
+ws/ws/.db_pass
+ws/ws/pg_service.conf
+
+*~
+*#
+
+venv/
+ws/venv
+
+*.log
+*.pot
+*.pyc
+__pycache__

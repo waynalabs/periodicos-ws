@@ -32,7 +32,8 @@ urlpatterns = [
     path("api/newspapers/", views.NewspapersViewSet.as_view({
         "get": "list"
     }), name="newspapers"),
-
+    path("api/articles/", views.ArticlesView.as_view(), name="articles"),
+    path("api/article/", views.ArticleView.as_view(), name="article")
     #path("api/", include(router.urls))
 ]
 

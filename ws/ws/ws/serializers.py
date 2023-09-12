@@ -5,6 +5,7 @@ Copyright Waynalabs 2023
 
 # from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework import pagination
 
 from ws.models import Newspapers, Articles, Authors, Categories, NewsAgencies
 
@@ -58,19 +59,35 @@ class NewspapersSerializer(serializers.HyperlinkedModelSerializer):
         # }
 
 
-class ArticlesSerializer(serializers.HyperlinkedModelSerializer):
-    url = serializers.HyperlinkedRelatedField(
-        view_name="articles",
-        lookup_field="id",
-        many=True,
-        allow_null=True,
-        read_only=True,
-    )
+class ArticleReducedSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Articles
-        fields = "__all__"
+        fields = ("id", "title", "date_published")
 
-        
+
+class ArticlesSerializer(serializers.Serializer, pagination.PageNumberPagination):
+    total = serializers.IntegerField()
+    limit = serializers.IntegerField()
+    offset = serializers.IntegerField()
+    articles = ArticleReducedSerializer(many=True)
+
+
+class ArticleSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    newspaper = serializers.CharField()
+    title = serializers.CharField()
+    url = serializers.CharField()
+    content_length = serializers.IntegerField()
+    description = serializers.CharField()
+    date_published = serializers.DateField()
+    categories = serializers.ListField(
+        child=serializers.CharField(allow_null=True)
+    )
+    authors = serializers.ListField(
+        child=serializers.CharField(allow_null=True)
+    )
+
+    
 # class SnippetSerializer(serializers.HyperlinkedModelSerializer):
 #     owner = serializers.ReadOnlyField(source='owner.username')
 #     highlight = serializers.HyperlinkedIdentityField(
