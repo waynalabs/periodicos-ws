@@ -33,21 +33,37 @@ class Articles(models.Model):
 
 class Authors(models.Model):
     id = models.IntegerField(primary_key=True)
-    article = models.ForeignKey(Articles, on_delete=models.CASCADE, null=True)
     name = models.TextField(null=False)
 
     class Meta:
         db_table = "authors"
 
 
+class ArticlesAuthors(models.Model):
+    id = models.IntegerField(primary_key=True)
+    article = models.ForeignKey(Articles, db_column="article_id", on_delete=models.CASCADE, null=True)
+    author =models.ForeignKey(Authors, db_column="author_id", on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        db_table = "articles_authors"
+
+
 class Categories(models.Model):
     id = models.IntegerField(primary_key=True)
-    newspaper = models.ForeignKey(Newspapers, on_delete=models.CASCADE, db_column="newspaper_id", null=True)
     article = models.ForeignKey(Articles, db_column="article_id", on_delete=models.CASCADE, null=True)
     name = models.TextField(null=False)
 
     class Meta:
         db_table = "categories"
+
+
+class ArticlesCategories(models.Model):
+    id = models.IntegerField(primary_key=True)
+    article = models.ForeignKey(Articles, db_column="article_id", on_delete=models.CASCADE, null=True)
+    category = models.ForeignKey(Categories, db_column="category_id", on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        db_table = "articles_categories"
 
 
 class NewsAgencies(models.Model):

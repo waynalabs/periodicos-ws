@@ -11,10 +11,12 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from django.http import JsonResponse
 
-from ws.models import Newspapers, Articles, Authors, Categories, NewsAgencies
+from ws.models import Newspapers, Articles, Authors, Categories, NewsAgencies, \
+    ArticlesAuthors, ArticlesCategories
 #from snippets.permissions import IsOwnerOrReadOnly
 from ws.serializers import NewspaperSerializer, NewspapersSerializer, \
-    ArticlesSerializer, ArticleSerializer
+    ArticlesSerializer, ArticleSerializer, \
+    AuthorsSerializer
 
 
 def customJsonResponse(status_code=404, custom_message='Resource not found.', exception=None):
@@ -66,11 +68,11 @@ class NewspaperView(views.APIView):
         	ARRAY_REMOVE(ARRAY_AGG(DISTINCT(au.name)), NULL) AS authors
         FROM
             newspapers n
-        LEFT JOIN
-            articles a ON n.id = a.newspaper_id
-        LEFT JOIN
-            authors au ON a.id = au.article_id
-        LEFT JOIN categories cat ON cat.article_id = au.article_id
+        LEFT JOIN articles a ON n.id = a.newspaper_id
+        LEFT JOIN articles_authors aa ON aa.article_id = a.id
+        LEFT JOIN authors au ON aa.author_id = au.id
+        LEFT JOIN articles_categories ac ON ac.article_id = a.id
+        LEFT JOIN categories cat ON ac.category_id = cat.id
         {where_statement}
         GROUP BY
             n.id, n.name
@@ -80,11 +82,11 @@ class NewspaperView(views.APIView):
         serializer = NewspaperSerializer({
             "id": query_result[0].id,
             "name": query_result[0].name,
-            "article_count": query_result[0].article_count,
-            "author_count": query_result[0].author_count,
+            "articles_count": query_result[0].article_count,
+            "authors_count": query_result[0].author_count,
             "categories_count": query_result[0].categories_count,
-            "categories": query_result[0].categories,
             "authors": query_result[0].authors,
+            "categories": query_result[0].categories,
         })
         return Response(serializer.data)
 
@@ -145,15 +147,29 @@ class ArticleView(views.APIView):
         
         article = None
         try:
-            article = Articles.objects.get(pk=id)
+            article = Articles.objects.get(id=id)
         except Exception as E:
             print(E)
             return customJsonResponse(404, f"Article with Id {id}, not found.")
 
         newspaper = Newspapers.objects.get(pk=article.newspaper_id)
-        
-        categories = Categories.objects.filter(article_id=article.id)
-        authors = Authors.objects.filter(article_id=article.id)
+
+        categories = Categories.objects.raw(f"""
+        SELECT a.id, cat.name
+          FROM articles a
+	  INNER JOIN articles_categories ac ON a.id = ac.article_id
+	  INNER JOIN categories cat ON cat.id = ac.category_id
+        WHERE a.id = {id}
+        """)
+        #print(categories)
+
+        authors = Authors.objects.raw(f"""
+        SELECT a.id, au.name
+          FROM articles a
+          INNER JOIN articles_authors ac ON a.id = ac.article_id
+          INNER JOIN authors au ON au.id = ac.author_id
+        WHERE a.id = {id}
+        """)
 
         serializer = ArticleSerializer({
             "id": article.id,
@@ -183,31 +199,17 @@ class NewspapersViewSet(viewsets.ModelViewSet):
 class ArticlesViewSet(viewsets.ModelViewSet):
     queryset = Articles.objects.all() # update this
 
-# class SnippetViewSet(viewsets.ModelViewSet):
-#     """
-#     This viewset automatically provides `list`, `create`, `retrieve`,
-#     `update` and `destroy` actions.
 
-#     Additionally we also provide an extra `highlight` action.
-#     """
-#     queryset = Snippet.objects.all()
-#     serializer_class = SnippetSerializer
-#     permission_classes = (
-#         permissions.IsAuthenticatedOrReadOnly,
-#         IsOwnerOrReadOnly, )
+# class AuthorView(views.APIView, LimitOffsetPagination):
 
-#     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
-#     def highlight(self, request, *args, **kwargs):
-#         snippet = self.get_object()
-#         return Response(snippet.highlighted)
+#     def get(self, request):
+#         name = request.query_params.get("name", None)
 
-#     def perform_create(self, serializer):
-#         serializer.save(owner=self.request.user)
+#         self.max_limit = 1000
 
+#         if name is None:
+#             return customJsonResponse(404, f"Author name {name}, not found.")
 
-# class UserViewSet(viewsets.ReadOnlyModelViewSet):
-#     """
-#     This viewset automatically provides `list` and `detail` actions.
-#     """
-#     queryset = User.objects.all()
-#     serializer_class = UserSerializer
+#         try:
+#             found_authors = list(Authors.objects.filter(name__istartswith=f"{name}%"))
+    

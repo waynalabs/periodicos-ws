@@ -7,13 +7,27 @@ Copyright Waynalabs 2023
 from rest_framework import serializers
 from rest_framework import pagination
 
-from ws.models import Newspapers, Articles, Authors, Categories, NewsAgencies
+from ws.models import Newspapers, Articles, Authors, Categories, NewsAgencies, \
+    ArticlesAuthors, ArticlesCategories
 
 
-class AuthorsSerializer(serializers.HyperlinkedModelSerializer):
+class ArticleReducedSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Authors
-        fields = ("name",)
+        model = Articles
+        fields = ("id", "title", "date_published")
+
+class AuthorsSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    articles_count = serializers.IntegerField()
+    categories_count = serializers.IntegerField()
+    categories = serializers.ListField(
+        child=serializers.CharField(allow_null=True)
+    )
+    articles = ArticleReducedSerializer(many=True)
+
+    total = serializers.IntegerField()
+    limit = serializers.IntegerField()
+    offset = serializers.IntegerField()
 
         
 class CategoriesSerializer(serializers.HyperlinkedModelSerializer):
@@ -31,8 +45,8 @@ class NewsAgenciesSerializer(serializers.HyperlinkedModelSerializer):
 class NewspaperSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
-    article_count = serializers.IntegerField()
-    author_count = serializers.IntegerField()
+    articles_count = serializers.IntegerField()
+    authors_count = serializers.IntegerField()
     categories_count = serializers.IntegerField()
     categories = serializers.ListField(
         child=serializers.CharField(allow_null=True)
@@ -40,8 +54,6 @@ class NewspaperSerializer(serializers.Serializer):
     authors = serializers.ListField(
         child=serializers.CharField(allow_null=True)
     )
-    #categories = CategoriesSerializer(many=True, read_only=True, allow_null=True)
-    #authors = AuthorsSerializer(many=True, read_only=True, allow_null=True)
 
 
 class NewspapersSerializer(serializers.HyperlinkedModelSerializer):
@@ -59,17 +71,12 @@ class NewspapersSerializer(serializers.HyperlinkedModelSerializer):
         # }
 
 
-class ArticleReducedSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Articles
-        fields = ("id", "title", "date_published")
-
-
 class ArticlesSerializer(serializers.Serializer, pagination.PageNumberPagination):
+    articles = ArticleReducedSerializer(many=True)
+
     total = serializers.IntegerField()
     limit = serializers.IntegerField()
     offset = serializers.IntegerField()
-    articles = ArticleReducedSerializer(many=True)
 
 
 class ArticleSerializer(serializers.Serializer):
@@ -86,8 +93,8 @@ class ArticleSerializer(serializers.Serializer):
     authors = serializers.ListField(
         child=serializers.CharField(allow_null=True)
     )
-
     
+
 # class SnippetSerializer(serializers.HyperlinkedModelSerializer):
 #     owner = serializers.ReadOnlyField(source='owner.username')
 #     highlight = serializers.HyperlinkedIdentityField(
