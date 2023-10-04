@@ -62,9 +62,22 @@ CREATE TABLE news_agencies (
 		REFERENCES newspapers (id)
 );
 
+CREATE TABLE ner_counts (
+       id SERIAL PRIMARY KEY,
+       article_id INT NULL,
+       article_field TEXT NOT NULL,
+       entity TEXT NOT NULL,
+       entity_type TEXT NOT NULL,
+       entity_count INT NOT NULL,
+       FOREIGN KEY (article_id)
+       	       REFERENCES articles (id)
+);
+
+
 -- DROP TABLE newspapers CASCADE;
 -- DROP TABLE articles CASCADE;
 -- DROP TABLE authors CASCADE;
 -- DROP TABLE articles_authors;
 -- DROP TABLE categories CASCADE;
 -- DROP TABLE articles_categories;
+-- DROP TABLE ner_counts;

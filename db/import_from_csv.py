@@ -78,10 +78,21 @@ class NewsAgencies(Base):
     newspaper_id = Column(Integer, ForeignKey('newspapers.id'))
     name = Column(String)
 
+
+class NerCount(Base):
+    __tablename__ = 'ner_counts'
+    id = Column(Integer, primary_key=True)
+    article_id = Column(Integer, ForeignKey('articles.id'))
+    article_field = Column(String)
+    entity = Column(String)
+    entity_type = Column(String)
+    entity_count = Column(Integer)
+
+
     
-# Create a connection
+#Create a connection
 with engine.connect() as connection:
-    # Loading every CSV file and inserting into the DB.
+#     # Loading every CSV file and inserting into the DB.
 
     for newspaper_name in datafiles_for_data_apps.keys():
         print()
@@ -100,7 +111,7 @@ with engine.connect() as connection:
                 print(E)
             
             if newspaper_id == 0:
-                print(f"Not found newspeper {newspaper_name}, skipping.")
+                print(f"Not found newspeper {newspaper_name}, skipping.)"
                 continue
             
             for index, row in df_norm.iterrows():
@@ -192,9 +203,59 @@ with engine.connect() as connection:
             print(f"ERROR reading newspaper {newspaper_name}")
             print(E)
             print()
-    
+
+    print("=====================================================")
+    print("Finished articles.")
+    print("Starting NER count to database.")
+
+    for newspaper_name in datafiles_for_data_apps.keys():
+        print(f"Processing for {newspaper_name}**")
+        for ner_count_file in datafiles_for_data_apps[newspaper_name]["ner_count_names"]:
+            print(f"File {ner_count_file}")
+            df_nercount = pd.read_csv(ner_count_file)
+
+            # ejemplo extraer description de eldeber_ner_count_description.csv
+            article_field = ner_count_file.split(".csv")[0].split("_")[2]
+
+            previous_title = ""
+            article_id = 0
+
+            for index, row in df_nercount.iterrows():
+                title = row['title']
+                print(f"article - {index}/{len(df_nercount)}: {title}...")
+
+                if previous_title != title:
+                    previous_title = title
+                    # buscando artículo
+                    try:
+                        result = connection.execute(select(Articles).
+                                                    where(Articles.title == title))
+                        article_id = result.first()._asdict()["id"]
+                    except Exception as E:
+                        print(f"Error with article '{row['title']}' --> {article_id}")
+                        print(E)
+                        continue
+                # insertando registro
+                try:
+                    # csv tiene title, type, entity, count
+                    insert_statement = insert(NerCount).values(
+                        article_id=int(article_id),
+                        article_field=article_field,
+                        entity=row["entity"],
+                        entity_type=row["type"],
+                        entity_count=int(row["count"])
+                    )
+                    cursor = connection.execute(insert_statement)
+                    connection.commit()
+                    
+                except Exception as E:
+                    print(f"Error inserting ner record: {row}")
+                    print(E)
+
     # Close the connection
     connection.close()
+
+    print("Finished.")
 
 
 

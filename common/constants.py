@@ -27,14 +27,28 @@ ABS_PATHS = {
 datafiles_for_data_apps = {
     "El Deber": {
         "normalized": f"{ABS_PATHS['data/csv']}/eldeber.normalized.csv",
-        "nername": "eldeber"
+        "nername": "eldeber",
+        "ner_count_names": [
+            f"{ABS_PATHS['data/csv']}/eldeber.ner_count_content.csv",
+            f"{ABS_PATHS['data/csv']}/eldeber.ner_count_description.csv",
+            f"{ABS_PATHS['data/csv']}/eldeber.ner_count_title.csv"
+        ]
     },
     "La Razón": {
         "normalized": f"{ABS_PATHS['data/csv']}/larazon.normalized.csv",
-        "nername": "larazon"
+        "nername": "larazon",
+        "ner_count_names": [
+            f"{ABS_PATHS['data/csv']}/larazon.ner_count_content.csv",
+            f"{ABS_PATHS['data/csv']}/larazon.ner_count_description.csv",
+            f"{ABS_PATHS['data/csv']}/larazon.ner_count_title.csv"
+        ]
     },
     "Los tiempos": {
         "normalized": f"{ABS_PATHS['data/csv']}/lostiempos.normalized.csv",
-        "nername": "lostiempos"
+        "nername": ["lostiempos"],
+        "ner_count_names": [
+            f"{ABS_PATHS['data/csv']}/lostiempos.ner_count_content.csv",
+            f"{ABS_PATHS['data/csv']}/lostiempos.ner_count_title.csv"
+        ]
     }
 }
