@@ -75,4 +75,13 @@ class NewsAgencies(models.Model):
         db_table = "news_agencies"
 
 
+class NerCounts(models.Model):
+    id = models.IntegerField(primary_key=True)
+    article = models.ForeignKey(Articles, db_column="article_id", on_delete=models.CASCADE, null=True)
+    article_field = models.TextField(null=False)
+    entity = models.TextField(null=False)
+    entity_type = models.TextField(null=False)
+    entity_count = models.IntegerField(null=False)
 
+    class Meta:
+        db_table = "ner_counts"

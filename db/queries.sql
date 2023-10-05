@@ -77,6 +77,24 @@ FROM
   filtered_categories
 ORDER BY articles_count;
 
+-- ner counts that starts with a given entity 
+SELECT a.title, a.url, a.date_published, n.name as newspaper,
+	nc.entity_count as ocurrences, nc.entity_type, nc.article_field, nc.entity
+FROM articles a
+	INNER JOIN ner_counts nc ON nc.article_id = a.id
+	INNER JOIN newspapers n ON n.id = a.newspaper_id
+WHERE nc.entity ILIKE 'evo morales%'
+ORDER BY ocurrences DESC
+
+-- ner counts strictly equal to a given entity
+SELECT a.title, a.url, a.date_published, n.name as newspaper,
+	nc.entity_count as ocurrences, nc.entity_type, nc.article_field as en, nc.entity
+FROM articles a
+	INNER JOIN ner_counts nc ON nc.article_id = a.id
+	INNER JOIN newspapers n ON n.id = a.newspaper_id
+WHERE nc.entity ILIKE 'evo morales'
+ORDER BY ocurrences DESC
+
 
 --- miscelaneas
 SELECT * FROM categories where name = 'bolivia'

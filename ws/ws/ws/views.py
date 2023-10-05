@@ -16,7 +16,8 @@ from ws.models import Newspapers, Articles, Authors, Categories, NewsAgencies, \
 #from snippets.permissions import IsOwnerOrReadOnly
 from ws.serializers import NewspaperSerializer, NewspapersSerializer, \
     ArticlesSerializer, ArticleSerializer, \
-    AuthorsSerializer
+    AuthorsSerializer, AuthorSearchSerializer, \
+    EntitySearchSerializer
 
 
 def customJsonResponse(status_code=404, custom_message='Resource not found.', exception=None):
@@ -33,13 +34,18 @@ def api_root(request, format=None):
         "newspaper": reverse("newspaper", request=request, format=format),
         "newspapers": reverse("newspapers", request=request, format=format),
         "articles": reverse("articles", request=request, format=format),
-        "article": reverse("article", request=request)
+        "article": reverse("article", request=request),
+        "authorSearch": reverse("authorSearch", request=request),
+        "namedEntitySearch": reverse("namedEntitySearch", request=request),
     })
 
 
 class NewspaperView(views.APIView):
 
     def get(self, request):
+        """
+        Retorna detalles de un periódico en específico.
+        """
         name = request.query_params.get("name", None)
         start_date = request.query_params.get("startDate", None)
         end_date = request.query_params.get("endDate", None)
@@ -135,6 +141,7 @@ class ArticlesView(views.APIView, LimitOffsetPagination):
         })
         return Response(serializer.data)
 
+
 class ArticleView(views.APIView):
 
     def get(self, request):
@@ -196,10 +203,77 @@ class NewspapersViewSet(viewsets.ModelViewSet):
     serializer_class = NewspapersSerializer
 
 
-class ArticlesViewSet(viewsets.ModelViewSet):
+class ArticlesViewSet(viewsets.ModelViewSet, LimitOffsetPagination):
     queryset = Articles.objects.all() # update this
 
 
+class AuthorSearch(views.APIView, LimitOffsetPagination):
+
+    def get(self, request):
+        name = request.query_params.get("name", None)
+
+        self.max_limit = 1000
+
+        if name is None:
+            return customJsonResponse(404, f"Author name {name.lower()}, not found.")
+
+        found_authors = []
+        try:
+            found_authors = list(Authors.objects.filter(name__startswith=f"{name.lower()}"))
+        except Exception as E:
+            return customJsonResponse(404, f"Author with name {name.lower()}, not found.")
+
+        results = self.paginate_queryset(found_authors, request, view=self)
+        
+        serializer = AuthorSearchSerializer({
+            "total":  self.count,
+            "limit": self.limit,
+            "offset": self.offset,
+            "authors": [author.name for author in results]
+        })
+        return Response(serializer.data)
+
+
+class EntitySearch(views.APIView, LimitOffsetPagination):
+    
+    def get(self, request):
+        search_text = request.query_params.get("searchText", None)
+        strict_equal = request.query_params.get("strictEqual", None)
+
+        if search_text is None:
+            return customJsonResponse(400, f"A searchText should be specified")
+
+        where_statement = f"WHERE nc.entity ILIKE '{search_text}"
+        if strict_equal is not None:
+            where_statement += "%'"
+        else:
+            where_statement += "'"
+
+        sql = f"""
+        Select nc.id,
+              a.title, a.url, a.date_published,
+              nc.entity_count as ocurrences, nc.entity_type,
+              nc.article_field, nc.entity
+        FROM articles a
+	  INNER JOIN ner_counts nc ON nc.article_id = a.id
+	  INNER JOIN newspapers n ON n.id = a.newspaper_id
+        {where_statement}
+        ORDER BY ocurrences DESC
+        """
+        query_result = list(Articles.objects.raw(sql))
+
+        results = self.paginate_queryset(
+            query_result,
+            request, view=self
+        )
+        serializer = EntitySearchSerializer({
+            "total": self.count,
+            "limit": self.limit,
+            "offset": self.offset,
+            "articles": results,
+        })
+        return Response(serializer.data)
+    
 # class AuthorView(views.APIView, LimitOffsetPagination):
 
 #     def get(self, request):

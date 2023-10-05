@@ -4,6 +4,7 @@ Copyright Waynalabs 2023
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.schemas import get_schema_view
 #from django.conf.urls import include, url
 from rest_framework.routers import DefaultRouter
 
@@ -21,7 +22,12 @@ urlpatterns = [
         "get": "list"
     }), name="newspapers"),
     path("api/articles/", views.ArticlesView.as_view(), name="articles"),
-    path("api/article/", views.ArticleView.as_view(), name="article")
+    path("api/article/", views.ArticleView.as_view(), name="article"),
+    path("api/authorSearch", views.AuthorSearch.as_view(), name="authorSearch"),
+
+    path("api/namedEntitySearch", views.EntitySearch.as_view(), name="namedEntitySearch"),
+    
+    path("schema/", get_schema_view(), name="schema"),
     #path("api/", include(router.urls))
 ]
 

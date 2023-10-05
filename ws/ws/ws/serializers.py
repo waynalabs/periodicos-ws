@@ -8,7 +8,7 @@ from rest_framework import serializers
 from rest_framework import pagination
 
 from ws.models import Newspapers, Articles, Authors, Categories, NewsAgencies, \
-    ArticlesAuthors, ArticlesCategories
+    ArticlesAuthors, ArticlesCategories, NerCounts
 
 
 class ArticleReducedSerializer(serializers.HyperlinkedModelSerializer):
@@ -29,6 +29,18 @@ class AuthorsSerializer(serializers.Serializer):
     limit = serializers.IntegerField()
     offset = serializers.IntegerField()
 
+
+class AuthorSearchSerializer(serializers.Serializer):
+    authors = serializers.ListField(
+        child=serializers.CharField(allow_null=True)
+    )
+    total = serializers.IntegerField()
+    limit = serializers.IntegerField()
+    offset = serializers.IntegerField()
+
+
+#class AuthorSerializer(serializers.Serializer):
+    
         
 class CategoriesSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -95,6 +107,26 @@ class ArticleSerializer(serializers.Serializer):
     )
     
 
+class ArticleNerCountSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    title = serializers.CharField()
+    url = serializers.CharField()
+    date_published = serializers.DateField()
+    ocurrences = serializers.IntegerField()
+    entity_type = serializers.CharField()
+    article_field = serializers.CharField()
+    entity = serializers.CharField()
+
+    
+class EntitySearchSerializer(serializers.Serializer, pagination.PageNumberPagination):
+    total = serializers.IntegerField()
+    offset = serializers.IntegerField()
+    limit = serializers.IntegerField()
+
+    articles = ArticleNerCountSerializer(many=True)
+
+
+    
 # class SnippetSerializer(serializers.HyperlinkedModelSerializer):
 #     owner = serializers.ReadOnlyField(source='owner.username')
 #     highlight = serializers.HyperlinkedIdentityField(

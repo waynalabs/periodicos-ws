@@ -20,3 +20,16 @@ pip install -r requirements.txt
 # ejecutar en modo desarrollo
 python manage.py runserver
 ```
+
+## Actualización de la documentación OPEN API
+
+```
+# Una vez activado el entorno virtual
+cd ws/
+python manage.py generateschema
+
+```
+
+## Revisar los endpoints
+
+Desde el navegador `/schema` muestra la especificación de los endpoints.
