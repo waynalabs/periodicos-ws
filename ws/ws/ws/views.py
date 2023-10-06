@@ -210,12 +210,12 @@ class ArticlesViewSet(viewsets.ModelViewSet, LimitOffsetPagination):
 class AuthorSearch(views.APIView, LimitOffsetPagination):
 
     def get(self, request):
-        name = request.query_params.get("name", None)
+        name = request.query_params.get("name", "").replace("'", "").replace("%", "")
 
         self.max_limit = 1000
 
-        if name is None:
-            return customJsonResponse(404, f"Author name {name.lower()}, not found.")
+        if name == "":
+            return customJsonResponse(400, f"Author name should be specified.")
 
         found_authors = []
         try:
@@ -235,22 +235,26 @@ class AuthorSearch(views.APIView, LimitOffsetPagination):
 
 
 class EntitySearch(views.APIView, LimitOffsetPagination):
-    
+
+
     def get(self, request):
-        search_text = request.query_params.get("searchText", None)
+        self.max_limit = 2000
+
+        search_text = request.query_params.get("searchText", ""). \
+                                          replace("'", "").replace("%", "")
         strict_equal = request.query_params.get("strictEqual", None)
 
-        if search_text is None:
+        if search_text == "":
             return customJsonResponse(400, f"A searchText should be specified")
 
         where_statement = f"WHERE nc.entity ILIKE '{search_text}"
-        if strict_equal is not None:
-            where_statement += "%'"
+        if strict_equal.lower() == "true" :
+            where_statement += "%%'"
         else:
             where_statement += "'"
 
         sql = f"""
-        Select nc.id,
+        SELECT a.id,
               a.title, a.url, a.date_published,
               nc.entity_count as ocurrences, nc.entity_type,
               nc.article_field, nc.entity
@@ -260,6 +264,7 @@ class EntitySearch(views.APIView, LimitOffsetPagination):
         {where_statement}
         ORDER BY ocurrences DESC
         """
+
         query_result = list(Articles.objects.raw(sql))
 
         results = self.paginate_queryset(
