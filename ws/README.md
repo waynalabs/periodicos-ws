@@ -21,15 +21,9 @@ pip install -r requirements.txt
 python manage.py runserver
 ```
 
-## Actualización de la documentación OPEN API
+## Documentación OPEN API
 
-```
-# Una vez activado el entorno virtual
-cd ws/
-python manage.py generateschema
+[openapi.yaml](openapi.yaml)
 
-```
+Para ver cómo usar el servicio.
 
-## Revisar los endpoints
-
-Desde el navegador `/schema` muestra la especificación de los endpoints.
