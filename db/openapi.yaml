@@ -1,0 +1,455 @@
+openapi: 3.0.3
+info:
+  title: Servicio web - Periódicos v1.0 
+  description: |-
+    Servicio web para consumir datos de periódicos. Sitio web [https://api.periodicos.rmgss.net](api.periodicos.rmgss.net). Servicio desarrollador por Waynalabs 2023.
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: rgarcia@laotra.red
+  license:
+    name: Licencia AGPL v3
+    url: https://www.gnu.org/licenses/agpl-3.0.en.html
+  version: "1.0"
+
+servers:
+  - url: https://api.periodicos.rmgss.net/api/
+tags:
+  - name: newspapers
+    description: Información general de periódicos.
+  - name: newspaper
+    description: Información mas detallada de periódico en específico
+  - name: articles
+    description: Listado de artículos de noticias.
+  - name: article
+    description: Datos de artículo en específico.
+  - name: author search
+    description: Búsqueda de autores a partir de un nombre dado.
+  - name: named entity search
+    description: Búsqueda rápida de entidades en artículos.
+paths:
+  /newspapers:
+    get:
+      tags:
+        - newspapers
+      summary: Listado de periódicos
+      description: Listar periódicos disponibles
+      operationId: newspapers
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Newspapers'
+        '404':
+          description: Not found
+  /newspaper:
+    get:
+      tags:
+        - newspaper
+      summary: Detalles de periódico específico.
+      description: Devuelve detalles generales de un periódico específico.
+      operationId: newspaper
+      parameters:
+        - name: name
+          in: query
+          description: Nombre del periódico
+          required: true
+          explode: false
+          schema:
+            type: string
+            example: El Deber
+        - name: startDate
+          in: query
+          description: Para devolver detalles **sólo a partir** de esta fecha.
+          required: false
+          explode: false
+          schema:
+            type: string
+            example: 2017-01-0
+        - name: endDate
+          in: query
+          description: Para devolver detalles **sólo hasta** esta fecha.
+          required: false
+          explode: false
+          schema:
+            type: string
+            example: 2020-01-01
+      responses:
+        '200':
+          description: Detalles de periódico
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Newspaper'          
+        '400':
+          description: Invalid status value
+        '404':
+          description: Not found
+  /articles:
+    get:
+      tags:
+        - articles
+      summary: Datos generales de artículos de noticias.
+      description:  Artículos para un periódico y rango de fechas dadas.
+      operationId: articles
+      parameters:
+        - name: name
+          in: query
+          description: Nombre del periódico
+          required: true
+          explode: false
+          schema:
+            type: string
+            example: El Deber
+        - name: startDate
+          in: query
+          description: Para devolver detalles **sólo a partir** de esta fecha.
+          required: false
+          explode: false
+          schema:
+            type: string
+            example: 2017-01-0
+        - name: endDate
+          in: query
+          description: Para devolver detalles **sólo hasta** esta fecha.
+          required: false
+          explode: false
+          schema:
+            type: string
+            example: 2020-01-01
+        - name: limit
+          in: query
+          description: Limita el número de resultados
+          required: false
+          explode: false
+          schema:
+            type: integer
+            example: 1000
+        - name: offset
+          in: query
+          description: Desplazamiento, para devolver resultados a partir de este valor.
+          required: false
+          schema:
+            type: integer
+            example: 4000
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Articles'          
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Pet not found
+  /article:
+    get:
+      tags:
+        - article
+      summary: Retorna detalles de un artículo específico.
+      description: Detalles de un artículo específico.
+      operationId: article
+      parameters:
+        - name: id
+          in: query
+          description: Identificador del artículo en específico.
+          required: true
+          schema:
+            type: integer
+            example: 72803
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        '404':
+          description: No encontrado
+  /authorSearch:
+    get:
+      tags:
+        - author search
+      summary: Búsqueda de autor por nombre.
+      description: Se busca un autor en toda la base de datos para devolver posibles coincidencias.
+      operationId: authorSearch
+      parameters:
+        - name: name
+          in: query
+          description: Nombre del autor buscado
+          required: true
+          schema:
+            type: string
+            example: juan
+        - name: limit
+          in: query
+          description: Limita el número de resultados.
+          required: false
+          explode: false
+          schema:
+            type: integer
+            example: 10
+        - name: offset
+          in: query
+          description: Desplazamiento, para devolver resultados a partir de este valor.
+          required: false
+          schema:
+            type: integer
+            example: 10
+      responses:
+        '200':
+          description: Autores econtrados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorSearchResponse'
+        '405':
+          description: Invalid input
+  /namedEntitySearch:
+    get:
+      tags:
+        - named entity search
+      summary: Búsqueda de nombre o entidad en artículos.
+      description: Ayuda a buscar un nombre de persona o entidad en todos los artículos.
+      operationId: namedEntitySearch
+      parameters:
+        - name: searchText
+          in: query
+          description: Texto a buscar en todos los artículos.
+          required: true
+          schema:
+            type: string
+            example: morales
+        - name: limit
+          in: query
+          description: Limita el número de resultados.
+          required: false
+          explode: false
+          schema:
+            type: integer
+            example: 100
+        - name: offset
+          in: query
+          description: Desplazamiento, para devolver resultados a partir de este valor.
+          required: false
+          schema:
+            type: integer
+            example: 100
+      responses:
+        '200':
+          description: Entidades o nombres encontrados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntitySearchResponse'
+        '400':
+          description: Invalid input.
+components:
+  schemas:
+    Newspapers:
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int64
+          example: 3
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: El Deber
+              min_date:
+                type: string
+                example: 2015-01-01
+              max_date:
+                type: string
+                example: 2023-04-18
+    Newspaper:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: El Deber
+        articles_count:
+          type: integer
+          format: int64
+          example: 17351
+        authors_count:
+          type: integer
+          format: int64
+          example: 55
+        authors:
+          type: array
+          items:
+            type: string
+            example: 
+              - bbc mundo
+              - diego seas
+              - leyla mendieta
+        categories_count:
+          type: integer
+          example: 18973
+        categories:
+          type: array
+          items:
+            type: string
+            example: 
+              - acero
+              - minerales
+              - minería
+              - medio ambiente
+    Articles:
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int64
+          example: 7175
+        limit:
+          type: integer
+          example: 1000
+        offset:
+          type: integer
+          example: 4000
+        articles:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 31638
+              title:
+                type: string
+                example: "Casa Blanca niega que Trump haya sido informado de recompensas rusas a los talibanes"
+              date_published:
+                type: string
+                example: 2020-06-27
+    Article:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 72803
+        newspaper:
+          type: string
+          example: La Razón
+        title:
+          type: string
+          example: Las esponjas también ‘estornudan’ para eliminar residuos
+        url:
+          type: string
+          example: https://www.la-razon.com/la-revista/2022/08/11/las-esponjas-tambien-estornudan-para-eliminar-residuos/
+        content_length:
+          type: integer
+          example: 2538
+        description:
+          type: string
+          example: El trabajo registró el comportamiento de ‘estornudo’ en dos especies de esponjas, la esponja tubular caribeña Aplysina archeri y otra especie indopacífica del género Chelonaplysilla.
+        date_published:
+          type: string
+          example: 2022-08-11
+        categories:
+          type: array
+          items:
+            type: string
+            example: 
+              - eliminan
+              - esponja
+              - estornudo
+        authors:
+          type: array
+          items:
+            type: string
+            example: 
+              - juan valencia
+    AuthorSearchResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Número de registros encontrados
+          example: 26
+        limit:
+          type: integer
+          example: 10
+          description: Límite de registros devueltos
+        offset:
+          type: integer
+          example: 10
+          description: Desplazamiento seleccionado.
+        authors:
+          type: array
+          items:
+            type: string
+            example:
+              - juan mejia
+              - juan mejía y williams farfán
+              - juan orgaz espinoza
+    EntitySearchResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Número de registros encontrados
+          example: 26
+        limit:
+          type: integer
+          example: 10
+          description: Límite de registros devueltos
+        offset:
+          type: integer
+          example: 10
+          description: Desplazamiento seleccionado.
+        articles:
+          type: array
+          description: Artículos donde se encontró el nombre o entidad buscada.
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 32188
+              title:
+                type: string
+                example: La CIDH aclara que no dio like a un tuit de Evo Morales
+              url:
+                type: string
+                example: https://eldeber.com.bo/pais/la-cidh-aclara-que-no-dio-like-a-un-tuit-de-evo-morales_194118
+              date_published:
+                type: string
+                example: 2020-07-30
+              ocurrences:
+                type: string
+                description: Número de veces que este nombre/entidad aparece en el campo específico del artículo.
+                example: 1
+              entity_type:
+                type: string
+                description: |-
+                  Tipo de nombre/entidad enontrada. Donde:
+                    - PER: Persona
+                    - ORG: Organización
+                    - MISC: Misceláneo
+                example: PER
+              article_field:
+                type: string
+                description: |-
+                  El nombre del campo en el artículo de noticias donde se encontró el nombre/entidad.
+                enum:
+                  - content
+                  - title
+                  - description
+              entity:
+                type: string
+                example: "Morales"

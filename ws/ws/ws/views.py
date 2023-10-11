@@ -242,7 +242,7 @@ class EntitySearch(views.APIView, LimitOffsetPagination):
 
         search_text = request.query_params.get("searchText", ""). \
                                           replace("'", "").replace("%", "")
-        strict_equal = request.query_params.get("strictEqual", None)
+        strict_equal = request.query_params.get("strictEqual", "")
 
         if search_text == "":
             return customJsonResponse(400, f"A searchText should be specified")
