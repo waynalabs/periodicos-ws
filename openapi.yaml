@@ -2,8 +2,8 @@ openapi: 3.0.3
 info:
   title: Servicio web - Periódicos v1.0 
   description: |-
-    Servicio web para consumir datos de periódicos. Sitio web [https://api.periodicos.rmgss.net](api.periodicos.rmgss.net). Servicio desarrollador por Waynalabs 2023.
-  termsOfService: http://swagger.io/terms/
+    Servicio web para consumir datos de periódicos. Sitio web [https://api.periodicos.rmgss.net](api.periodicos.rmgss.net). Servicio desarrollador por Waynalabs 2023 - [Código fuente](https://github.com/waynalabs/periodicos-ws).
+   
   contact:
     email: rgarcia@laotra.red
   license:
