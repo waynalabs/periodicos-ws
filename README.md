@@ -27,3 +27,20 @@ python manage.py runserver
 
 Para ver cómo usar el servicio.
 
+### Levantar openapi con swagger-ui
+
+En el directorio raíz de este proyecto.
+
+```
+docker run --rm -p 8080:8080 -e 80 -e SWAGGER_JSON=/temp/openapi.json -v $(pwd):/temp swaggerapi/swagger-ui
+```
+
+## Notas deploy
+
+### postgres y debian
+
+Para postgres 15 se pudo conectar a postgres modificando el password a algo mas seguro. Quizá por políticas de seguridad nuevas.
+
+```
+ALTER USER postgres WITH ENCRYPTED PASSWORD 'U1nP4as5-W@$ord';
+```
