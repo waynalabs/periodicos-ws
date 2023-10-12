@@ -23,9 +23,10 @@ python manage.py runserver
 
 ## Documentación OPEN API
 
-[openapi.yaml](openapi.yaml)
-
 Para ver cómo usar el servicio.
+
+- [https://api.periodicos.rmgss.net/schema](https://api.periodicos.rmgss.net/schema)
+- [openapi.yaml](openapi.yaml)
 
 ### Levantar openapi con swagger-ui
 
