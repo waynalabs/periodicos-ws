@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$0=o4zrobek754c6af246kkaxyzy&_9j@y0ak60^=-v@b6-pgs'
+SECRET_KEY = 'django2nsandbox-$0=o4zrobek754c6af246kkaxyzy&_9j@y0ak60^=-v@b6-pgs'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -108,16 +108,18 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     # 'DEFAULT_PAGINATION_CLASS': 'ws.serializers.CustomPagination',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    
     'PAGE_SIZE': 100,
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PERMISSION_CLASSES': [],
     'UNAUTHENTICATED_USER': None,
+
 }
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en- us'
+LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
