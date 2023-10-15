@@ -97,7 +97,7 @@
             "explode": false,
             "schema": {
               "type": "string",
-              "example": "2017-01-01T00:00:00.000Z"
+              "example": "2017-01-01"
             }
           },
           {
@@ -108,7 +108,7 @@
             "explode": false,
             "schema": {
               "type": "string",
-              "example": "2020-01-01T00:00:00.000Z"
+              "example": "2020-01-01"
             }
           }
         ],
@@ -163,7 +163,7 @@
             "explode": false,
             "schema": {
               "type": "string",
-              "example": "2017-01-01T00:00:00.000Z"
+              "example": "2017-01-01"
             }
           },
           {
@@ -174,7 +174,7 @@
             "explode": false,
             "schema": {
               "type": "string",
-              "example": "2020-01-01T00:00:00.000Z"
+              "example": "2020-01-01"
             }
           },
           {
@@ -394,12 +394,12 @@
                 },
                 "min_date": {
                   "type": "string",
-                  "example": "2015-01-01T00:00:00.000Z",
+                  "example": "2015-01-01",
                   "description": "Formato `AAAA/MM/DD`"
                 },
                 "max_date": {
                   "type": "string",
-                  "example": "2023-04-18T00:00:00.000Z",
+                  "example": "2023-04-18",
                   "description": "Formato `AAAA/MM/DD`"
                 }
               }
@@ -489,7 +489,7 @@
                 },
                 "date_published": {
                   "type": "string",
-                  "example": "2020-06-27T00:00:00.000Z",
+                  "example": "2020-06-27",
                   "description": "Formato `AAAA/MM/DD`"
                 }
               }
@@ -620,7 +620,7 @@
                 },
                 "date_published": {
                   "type": "string",
-                  "example": "2020-07-30T00:00:00.000Z",
+                  "example": "2020-07-30",
                   "description": "Formato `AAAA/MM/DD`"
                 },
                 "ocurrences": {

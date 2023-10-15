@@ -66,7 +66,7 @@ paths:
           explode: false
           schema:
             type: string
-            example: 2017-01-01
+            example: "2017-01-01"
         - name: endDate
           in: query
           description: Para devolver detalles **sólo hasta** esta fecha. Formato `AAAA/MM/DD`
@@ -74,7 +74,7 @@ paths:
           explode: false
           schema:
             type: string
-            example: 2020-01-01
+            example: "2020-01-01"
       responses:
         '200':
           description: Detalles de periódico
@@ -111,7 +111,7 @@ paths:
           explode: false
           schema:
             type: string
-            example: 2017-01-01
+            example: "2017-01-01"
         - name: endDate
           in: query
           description: Para devolver detalles **sólo hasta** esta fecha. Formato `AAAA/MM/DD`
@@ -119,7 +119,7 @@ paths:
           explode: false
           schema:
             type: string
-            example: 2020-01-01
+            example: "2020-01-01"
         - name: limit
           in: query
           description: Limita el número de resultados
@@ -267,11 +267,11 @@ components:
                 example: El Deber
               min_date:
                 type: string
-                example: 2015-01-01
+                example: "2015-01-01"
                 description: Formato `AAAA/MM/DD`
               max_date:
                 type: string
-                example: 2023-04-18
+                example: "2023-04-18"
                 description: Formato `AAAA/MM/DD`
     Newspaper:
       type: object
@@ -337,7 +337,7 @@ components:
                 example: "Casa Blanca niega que Trump haya sido informado de recompensas rusas a los talibanes"
               date_published:
                 type: string
-                example: 2020-06-27
+                example: "2020-06-27"
                 description: Formato `AAAA/MM/DD`
     Article:
       type: object
@@ -433,7 +433,7 @@ components:
                 example: https://eldeber.com.bo/pais/la-cidh-aclara-que-no-dio-like-a-un-tuit-de-evo-morales_194118
               date_published:
                 type: string
-                example: 2020-07-30
+                example: "2020-07-30"
                 description: Formato `AAAA/MM/DD`
               ocurrences:
                 type: string
