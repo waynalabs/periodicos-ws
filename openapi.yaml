@@ -61,15 +61,15 @@ paths:
             example: El Deber
         - name: startDate
           in: query
-          description: Para devolver detalles **sólo a partir** de esta fecha.
+          description: Para devolver detalles **sólo a partir** de esta fecha. Formato `AAAA/MM/DD`
           required: false
           explode: false
           schema:
             type: string
-            example: 2017-01-0
+            example: 2017-01-01
         - name: endDate
           in: query
-          description: Para devolver detalles **sólo hasta** esta fecha.
+          description: Para devolver detalles **sólo hasta** esta fecha. Formato `AAAA/MM/DD`
           required: false
           explode: false
           schema:
@@ -106,15 +106,15 @@ paths:
             example: El Deber
         - name: startDate
           in: query
-          description: Para devolver detalles **sólo a partir** de esta fecha.
+          description: Para devolver detalles **sólo a partir** de esta fecha. Formato `AAAA/MM/DD`
           required: false
           explode: false
           schema:
             type: string
-            example: 2017-01-0
+            example: 2017-01-01
         - name: endDate
           in: query
-          description: Para devolver detalles **sólo hasta** esta fecha.
+          description: Para devolver detalles **sólo hasta** esta fecha. Formato `AAAA/MM/DD`
           required: false
           explode: false
           schema:
@@ -134,7 +134,7 @@ paths:
           required: false
           schema:
             type: integer
-            example: 4000
+            example: 0
       responses:
         '200':
           description: successful operation
@@ -199,7 +199,7 @@ paths:
           required: false
           schema:
             type: integer
-            example: 10
+            example: 0
       responses:
         '200':
           description: Autores econtrados
@@ -238,7 +238,7 @@ paths:
           required: false
           schema:
             type: integer
-            example: 100
+            example: 0
       responses:
         '200':
           description: Entidades o nombres encontrados
@@ -268,9 +268,11 @@ components:
               min_date:
                 type: string
                 example: 2015-01-01
+                description: Formato `AAAA/MM/DD`
               max_date:
                 type: string
                 example: 2023-04-18
+                description: Formato `AAAA/MM/DD`
     Newspaper:
       type: object
       properties:
@@ -321,7 +323,7 @@ components:
           example: 1000
         offset:
           type: integer
-          example: 4000
+          example: 0
         articles:
           type: array
           items:
@@ -336,6 +338,7 @@ components:
               date_published:
                 type: string
                 example: 2020-06-27
+                description: Formato `AAAA/MM/DD`
     Article:
       type: object
       properties:
@@ -360,6 +363,7 @@ components:
         date_published:
           type: string
           example: 2022-08-11
+          description: Formato `AAAA/MM/DD`
         categories:
           type: array
           items:
@@ -387,7 +391,7 @@ components:
           description: Límite de registros devueltos
         offset:
           type: integer
-          example: 10
+          example: 0
           description: Desplazamiento seleccionado.
         authors:
           type: array
@@ -410,7 +414,7 @@ components:
           description: Límite de registros devueltos
         offset:
           type: integer
-          example: 10
+          example: 0
           description: Desplazamiento seleccionado.
         articles:
           type: array
@@ -430,6 +434,7 @@ components:
               date_published:
                 type: string
                 example: 2020-07-30
+                description: Formato `AAAA/MM/DD`
               ocurrences:
                 type: string
                 description: Número de veces que este nombre/entidad aparece en el campo específico del artículo.
