@@ -17,7 +17,8 @@ from ws.models import Newspapers, Articles, Authors, Categories, NewsAgencies, \
 from ws.serializers import NewspaperSerializer, NewspapersSerializer, \
     ArticlesSerializer, ArticleSerializer, \
     AuthorsSerializer, AuthorSearchSerializer, \
-    EntitySearchSerializer
+    EntitySearchSerializer, \
+    ArticleCategorySerializer, CategorySerializer
 
 
 def customJsonResponse(status_code=404, custom_message='Resource not found.', exception=None):
@@ -36,6 +37,7 @@ def api_root(request, format=None):
         "articles": reverse("articles", request=request, format=format),
         "article": reverse("article", request=request),
         "authorSearch": reverse("authorSearch", request=request),
+        "category": reverse("category", request=request),
         "namedEntitySearch": reverse("namedEntitySearch", request=request),
     })
 
@@ -104,7 +106,7 @@ class ArticlesView(views.APIView, LimitOffsetPagination):
         start_date = request.query_params.get("startDate", None)
         end_date = request.query_params.get("endDate", None)
 
-        self.max_limit = 1000
+        self.max_limit = 5000
 
         # TODO: Validate date params
         where_statement = ""
@@ -215,7 +217,7 @@ class AuthorSearch(views.APIView, LimitOffsetPagination):
         self.max_limit = 1000
 
         if name == "":
-            return customJsonResponse(400, f"Author name should be specified.")
+            return customJsonResponse(400, f"Author name must be specified.")
 
         found_authors = []
         try:
@@ -234,11 +236,54 @@ class AuthorSearch(views.APIView, LimitOffsetPagination):
         return Response(serializer.data)
 
 
+class CategoryView(views.APIView, LimitOffsetPagination):
+
+    def get(self, request):
+        category = request.query_params.get("category", "").replace("'", "").replace("%", "")
+
+        if category == "":
+            return customJsonResponse(400, "a category must be specified.")
+
+        self.max_limit = 5000
+
+        try:
+            sql = f"""
+            WITH filtered_categories AS (
+              SELECT
+            	a.id, a.title, a.url, a.date_published
+              FROM
+                categories c
+              INNER JOIN articles_categories ac ON c.id = ac.category_id
+              INNER JOIN articles a ON a.id = ac.article_id
+              WHERE
+                c.name ilike '{category}'
+            )
+            SELECT DISTINCT(id), title, url
+            FROM
+              filtered_categories
+            """
+            results = list(Articles.objects.raw(sql))
+            articles = self.paginate_queryset(
+                results, request, view=self
+            )
+            serializer = CategorySerializer({
+                "total": self.count,
+                "limit": self.limit,
+                "offset": self.offset,
+                "category": category,
+                "articles": articles,
+            })
+            return Response(serializer.data)
+        except Exception as E:
+            print(E)
+            return customJsonResponse(500, "An error occurred during the query.")
+            
+    
 class EntitySearch(views.APIView, LimitOffsetPagination):
 
 
     def get(self, request):
-        self.max_limit = 2000
+        self.max_limit = 2500
 
         search_text = request.query_params.get("searchText", ""). \
                                           replace("'", "").replace("%", "")

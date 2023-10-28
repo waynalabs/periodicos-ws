@@ -46,12 +46,18 @@ class AuthorSearchSerializer(serializers.Serializer):
     offset = serializers.IntegerField()
 
 
-# class ArticleCategorySerializer    
+class ArticleCategorySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    title = serializers.CharField()
+    url = serializers.CharField()
+    date_published = serializers.DateField()
 
-class CategorySearchSerializer(serializers.Serializer):
-    categories = serializers.ListField(
+
+class CategorySerializer(serializers.Serializer):
+    articles = serializers.ListField(
         child=ArticleForCategorySerializer()
     )
+    category = serializers.CharField()
     total = serializers.IntegerField()
     limit = serializers.IntegerField()
     offset = serializers.IntegerField()
