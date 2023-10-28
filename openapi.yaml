@@ -24,6 +24,8 @@ tags:
     description: Datos de artículo en específico.
   - name: author search
     description: Búsqueda de autores a partir de un nombre dado.
+  - name: category
+    description: Artículos correspondientes a una categoría dada.
   - name: named entity search
     description: Búsqueda rápida de entidades en artículos.
 paths:
@@ -231,7 +233,7 @@ paths:
           explode: false
           schema:
             type: integer
-            example: 100
+            example: 1000
         - name: offset
           in: query
           description: Desplazamiento, para devolver resultados a partir de este valor.
@@ -248,6 +250,47 @@ paths:
                 $ref: '#/components/schemas/EntitySearchResponse'
         '400':
           description: Invalid input.
+  /category:
+    get:
+      tags:
+        - category
+      summary: Obtención de artículos de una categoría dada.
+      description: Obtiene una lista de artículos de una categoría dada.
+      operationId: category
+      parameters:
+        - name: category
+          in: query
+          description: Categoría a buscar.
+          required: true
+          schema:
+            type: string
+            example: reservas
+        - name: limit
+          in: query
+          description: Limita el número de resultados.
+          required: false
+          explode: false
+          schema:
+            type: integer
+            example: 1000
+        - name: offset
+          in: query
+          description: Desplazamiento, para devolver resultados a partir de este valor.
+          required: false
+          schema:
+            type: integer
+            example: 0
+      responses:
+        '200':
+          description: Artículos encontradis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+        '400':
+          description: Invalid input.
+        '404':
+          description: Not found.
 components:
   schemas:
     Newspapers:
@@ -387,7 +430,7 @@ components:
           example: 26
         limit:
           type: integer
-          example: 10
+          example: 1000
           description: Límite de registros devueltos
         offset:
           type: integer
@@ -401,6 +444,47 @@ components:
               - juan mejia
               - juan mejía y williams farfán
               - juan orgaz espinoza
+    CategoryResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Número de registros encontrados
+          example: 1000
+        limit:
+          type: integer
+          example: 1000
+          description: Límite de registros devueltos
+        offset:
+          type: integer
+          example: 0
+          description: Desplazamiento seleccionado.
+        category:
+          type: string
+          example: incendios
+          description: Categoría encontrada
+        articles:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: identificador de artículo
+                example: 48765
+              title:
+                type: string
+                description: Título del artículo
+                example: Presidente de la ABC reaparece y exige disculpas a Héctor Arce; este dice que buscan cerrar el caso
+              url:
+                type: string
+                description: Enlace al artículo
+                example: https://eldeber.com.bo/pais/presidente-de-la-abc-reaparece-y-exige-disculpas-a-hector-arce-este-dice-que-buscan-cerrar-el-caso_320429
+              date_published:
+                type: string
+                description: Fecha de publicación del artículo. Formato `YYYY-MM-DD`
+                example: "2023-04-04"
+          
     EntitySearchResponse:
       type: object
       properties:
