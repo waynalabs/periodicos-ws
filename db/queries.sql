@@ -57,18 +57,54 @@ INNER JOIN articles a ON a.newspaper_id = n.id
 INNER JOIN authors au ON a.id = au.article_id
 WHERE n.id = 1
 
-----
+--- articles belonging a specific category
+WITH filtered_categories AS (
+  SELECT
+    c.name AS category_name,
+	a.id, a.title, a.url
+  FROM
+    categories c
+  INNER JOIN articles_categories ac ON c.id = ac.category_id
+  INNER JOIN articles a ON a.id = ac.article_id
+  WHERE
+    c.name ilike 'bolivia'
+)
+SELECT DISTINCT(id) as article_id, category_name,  title, url
+FROM
+  filtered_categories
+  
+  
+-- articles belonging a specific category, returning a column with list of article objects
+WITH filtered_categories AS (
+  SELECT
+	DISTINCT(a.id), a.title, a.url,
+    c.name AS category_name
+  FROM
+    categories c
+  INNER JOIN articles_categories ac ON c.id = ac.category_id
+  INNER JOIN articles a ON a.id = ac.article_id
+  WHERE
+    c.name ilike 'bolivia'
+)
+SELECT fc.category_name, 
+	json_agg(json_build_object('id', fc.id, 'title', fc.title, 'url', fc.url))
+FROM
+  filtered_categories fc
+GROUP BY fc.category_name
+
+
+-- articles and article count for a specific category (includes duplicates)
 WITH filtered_categories AS (
   SELECT
     c.name AS category_name,
     COUNT(a.id) AS articles_count,
-    json_agg(json_build_object('id', a.id, 'title', a.title)) AS articles
+    json_agg(json_build_object('id', a.id, 'title', a.title, 'url', a.url)) AS articles
   FROM
     categories c
-  JOIN
-    articles a ON c.article_id = a.id
+  INNER JOIN articles_categories ac ON c.id = ac.category_id
+  INNER JOIN articles a ON a.id = ac.article_id
   WHERE
-    c.name LIKE 'bolivia%'
+    c.name = 'bolivia'
   GROUP BY
     c.name
 )
@@ -101,6 +137,13 @@ FROM articles a
 WHERE nc.entity ILIKE 'Adelaida'
 ORDER BY ocurrences DESC
 
+
+-- articles and authors belonging a specific category
+SELECT cat.name, a.url
+
+
+SELECT * FROM categories LIMIT 5
+SELECT * FROM articles_categories
 
 --- miscelaneas
 SELECT * FROM categories where name = 'bolivia'

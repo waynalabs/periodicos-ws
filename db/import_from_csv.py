@@ -1,4 +1,5 @@
-
+# This file is part of periodicos-ws
+# Copyright Waynalabs 2023
 
 import os
 import sys
@@ -92,7 +93,7 @@ class NerCount(Base):
     
 #Create a connection
 with engine.connect() as connection:
-#     # Loading every CSV file and inserting into the DB.
+    # Loading every CSV file and inserting into the DB.
 
     for newspaper_name in datafiles_for_data_apps.keys():
         print()
@@ -111,7 +112,7 @@ with engine.connect() as connection:
                 print(E)
             
             if newspaper_id == 0:
-                print(f"Not found newspeper {newspaper_name}, skipping.)"
+                print(f"Not found newspeper {newspaper_name}, skipping.)")
                 continue
             
             for index, row in df_norm.iterrows():
@@ -155,15 +156,18 @@ with engine.connect() as connection:
                                     result = connection.execute(select(Categories).
                                                                 where(Categories.name == category))
                                     category_id = result.first()._asdict()["id"]
-                                    # relationship article_category
-                                    insert_statement = insert(ArticlesCategories).values(
-                                        article_id=article_id,
-                                        category_id=category_id
-                                        )
-                                    connection.execute(insert_statement)
-                                    connection.commit()
-
                                     print(f"  inserted new category: {category}")
+                                else:
+                                    category_id = categories_found[0][0]
+
+                                # relationship article_category
+                                insert_statement = insert(ArticlesCategories).values(
+                                    article_id=article_id,
+                                    category_id=category_id
+                                )
+                                connection.execute(insert_statement)
+                                connection.commit()
+                                    
                             except Exception as E:
                                 print(f"Error inserting category: {E}")
 
@@ -180,18 +184,21 @@ with engine.connect() as connection:
                                 connection.execute(insert_statement)
                                 connection.commit()
 
-                                # relationship articles_authors
                                 result = connection.execute(select(Authors).
                                                             where(Authors.name == author))
                                 author_id = result.first()._asdict()["id"]
-                                insert_statement = insert(ArticlesAuthors).values(
-                                    article_id = article_id,
-                                    author_id = author_id
-                                )
-                                connection.execute(insert_statement)
-                                connection.commit()
-
                                 print(f"  inserted new author: {author}")
+                            else:
+                                author_id = authors_found[0][0]
+
+                            # relationship articles_authors
+                            insert_statement = insert(ArticlesAuthors).values(
+                                article_id = article_id,
+                                author_id = author_id
+                            )
+                            connection.execute(insert_statement)
+                            connection.commit()
+
                         except Exception as E:
                             print(f"Error inserting author: {E}")
                     

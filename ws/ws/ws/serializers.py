@@ -16,6 +16,13 @@ class ArticleReducedSerializer(serializers.HyperlinkedModelSerializer):
         model = Articles
         fields = ("id", "title", "date_published")
 
+
+class ArticleForCategorySerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Articles
+        fields = ("id", "title", "url")
+
+
 class AuthorsSerializer(serializers.Serializer):
     name = serializers.CharField()
     articles_count = serializers.IntegerField()
@@ -39,9 +46,17 @@ class AuthorSearchSerializer(serializers.Serializer):
     offset = serializers.IntegerField()
 
 
-#class AuthorSerializer(serializers.Serializer):
+# class ArticleCategorySerializer    
+
+class CategorySearchSerializer(serializers.Serializer):
+    categories = serializers.ListField(
+        child=ArticleForCategorySerializer()
+    )
+    total = serializers.IntegerField()
+    limit = serializers.IntegerField()
+    offset = serializers.IntegerField()
     
-        
+    
 class CategoriesSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Categories

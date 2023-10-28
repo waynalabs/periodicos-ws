@@ -5,9 +5,9 @@ CREATE TABLE newspapers(
 	max_date DATE
 );
 
-INSERT INTO newspapers (name, min_date, max_date) VALUES ('El Deber', '2015-01-01'::DATE, '2023-04-18'::DATE);
-INSERT INTO newspapers (name, min_date, max_date) VALUES ('La Razón', '2018-08-23'::DATE, '2023-04-19'::DATE);
-INSERT INTO newspapers (name, min_date, max_date) VALUES ('Los tiempos', '2022-05-09'::DATE, '2023-12-02'::DATE);
+INSERT INTO newspapers (name, min_date, max_date) VALUES ('El Deber', '2015-01-01'::DATE, '2023-10-26'::DATE);
+INSERT INTO newspapers (name, min_date, max_date) VALUES ('La Razón', '2018-08-23'::DATE, '2023-09-09'::DATE);
+INSERT INTO newspapers (name, min_date, max_date) VALUES ('Los tiempos', '2022-05-09'::DATE, '2023-08-23'::DATE);
 
 --SELECT * FROM newspapers;
 
