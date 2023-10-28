@@ -308,7 +308,7 @@ class EntitySearch(views.APIView, LimitOffsetPagination):
 	  INNER JOIN ner_counts nc ON nc.article_id = a.id
 	  INNER JOIN newspapers n ON n.id = a.newspaper_id
         {where_statement}
-        ORDER BY ocurrences DESC
+        ORDER BY a.date_published DESC
         """
 
         query_result = list(Articles.objects.raw(sql))
