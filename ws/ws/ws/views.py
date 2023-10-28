@@ -18,7 +18,7 @@ from ws.serializers import NewspaperSerializer, NewspapersSerializer, \
     ArticlesSerializer, ArticleSerializer, \
     AuthorsSerializer, AuthorSearchSerializer, \
     EntitySearchSerializer, \
-    ArticleCategorySerializer, CategorySerializer
+    CategorySerializer
 
 
 def customJsonResponse(status_code=404, custom_message='Resource not found.', exception=None):
@@ -258,9 +258,10 @@ class CategoryView(views.APIView, LimitOffsetPagination):
               WHERE
                 c.name ilike '{category}'
             )
-            SELECT DISTINCT(id), title, url
+            SELECT DISTINCT(id), title, url, date_published
             FROM
               filtered_categories
+            ORDER BY date_published DESC
             """
             results = list(Articles.objects.raw(sql))
             articles = self.paginate_queryset(

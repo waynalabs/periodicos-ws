@@ -229,7 +229,7 @@ with engine.connect() as connection:
 
             for index, row in df_nercount.iterrows():
                 title = row['title']
-                print(f"article - {index}/{len(df_nercount)}: {title}...")
+                print(f"{index}/{len(df_nercount)}: {title}")
 
                 if previous_title != title:
                     previous_title = title

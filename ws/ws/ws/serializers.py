@@ -20,7 +20,7 @@ class ArticleReducedSerializer(serializers.HyperlinkedModelSerializer):
 class ArticleForCategorySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Articles
-        fields = ("id", "title", "url")
+        fields = ("id", "title", "url", "date_published")
 
 
 class AuthorsSerializer(serializers.Serializer):
@@ -46,11 +46,11 @@ class AuthorSearchSerializer(serializers.Serializer):
     offset = serializers.IntegerField()
 
 
-class ArticleCategorySerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    title = serializers.CharField()
-    url = serializers.CharField()
-    date_published = serializers.DateField()
+# class ArticleCategorySerializer(serializers.Serializer):
+#     id = serializers.IntegerField()
+#     title = serializers.CharField()
+#     date_published = serializers.DateField()
+#     url = serializers.CharField()
 
 
 class CategorySerializer(serializers.Serializer):
