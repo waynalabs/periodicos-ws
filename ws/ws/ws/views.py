@@ -102,7 +102,7 @@ class NewspaperView(views.APIView):
 class ArticlesView(views.APIView, LimitOffsetPagination):
 
     def get(self, request):
-        newspaper = request.query_params.get("newspaper", None)
+        newspaper = request.query_params.get("name", None)
         start_date = request.query_params.get("startDate", None)
         end_date = request.query_params.get("endDate", None)
 
