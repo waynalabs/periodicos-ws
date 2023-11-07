@@ -138,6 +138,14 @@ class ArticleNerCountSerializer(serializers.Serializer):
     article_field = serializers.CharField()
     entity = serializers.CharField()
 
+
+class ArticleTextSearchSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    title = serializers.CharField()
+    url = serializers.CharField()
+    date_published = serializers.DateField()
+    rate = serializers.FloatField()
+
     
 class EntitySearchSerializer(serializers.Serializer, pagination.PageNumberPagination):
     total = serializers.IntegerField()
@@ -146,6 +154,14 @@ class EntitySearchSerializer(serializers.Serializer, pagination.PageNumberPagina
 
     articles = ArticleNerCountSerializer(many=True)
 
+
+class TextSearchArticlesSerializer(serializers.Serializer, pagination.PageNumberPagination):
+    total = serializers.IntegerField()
+    offset = serializers.IntegerField()
+    limit = serializers.IntegerField()
+    min_rate = serializers.IntegerField()
+
+    articles = ArticleTextSearchSerializer(many=True)
 
     
 # class SnippetSerializer(serializers.HyperlinkedModelSerializer):

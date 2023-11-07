@@ -26,6 +26,8 @@ tags:
     description: Búsqueda de autores a partir de un nombre dado.
   - name: category
     description: Artículos correspondientes a una categoría dada.
+  - name: full text search
+    description: Busca el texto dado en todos los artículos
   - name: named entity search
     description: Búsqueda rápida de entidades en artículos.
 paths:
@@ -211,6 +213,53 @@ paths:
                 $ref: '#/components/schemas/AuthorSearchResponse'
         '405':
           description: Invalid input
+  /fullTextSearch:
+    get:
+      tags:
+        - full text search
+      summary: Búsqueda de texto en todos los artículos.
+      description: Realiza una búsqueda rápida del texto solicitado en todos los artículos. Los artículos encontrados se ordenan de mayor a menor por el mejor puntaje de aciertos.
+      operationId: fullTextSearch
+      parameters:
+        - name: searchText
+          in: query
+          description: Texto a buscar en todos los artículos, entre 3 a 750 caracteres.
+          required: true
+          schema:
+            type: string
+            example: Zarate Willca
+        - name: rate
+          in: query
+          description: Puntaje de acierto mínimo requerido, por defecto es 9. Este número entre 1 y 100 sirve para filtrar artículos que tengan al menos ese porcentaje de aciertos en la búsqueda del texto dado.
+          required: false
+          schema:
+            type: integer
+            example: 9
+        - name: limit
+          in: query
+          description: Limita el número de resultados.
+          required: false
+          explode: false
+          schema:
+            type: integer
+            example: 1000
+        - name: offset
+          in: query
+          description: Desplazamiento, para devolver resultados a partir de este valor.
+          required: false
+          schema:
+            type: integer
+            example: 0
+
+      responses:
+        '200':
+          description: Entidades o nombres encontrados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullTextSearchResponse'
+        '400':
+          description: Invalid input.
   /namedEntitySearch:
     get:
       tags:
@@ -484,7 +533,47 @@ components:
                 type: string
                 description: Fecha de publicación del artículo. Formato `YYYY-MM-DD`
                 example: "2023-04-04"
-          
+    FullTextSearchResponse:
+      type: object
+      properties:
+        min_rate:
+          type: integer
+          description: Puntaje de acierto mínimo requerido, por defecto es 9. Este número entre 1 y 100 sirve para filtrar artículos que tengan al menos ese porcentaje de aciertos en la búsqueda del texto dado.
+          example: 9
+        total:
+          type: integer
+          description: Número de registros encontrados
+          example: 26
+        limit:
+          type: integer
+          example: 100
+          description: Límite de registros devueltos
+        offset:
+          type: integer
+          example: 0
+          description: Desplazamiento seleccionado.
+        articles:
+          type: array
+          description: Artículos donde se encontró el texto solicitado.
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 21427
+              title:
+                type: string
+                example: Quién fue el 'Temible' Zarate Willca y por qué Sucre rechaza que figure en el billete de Bs 50"
+              url:
+                type: string
+                example: https://eldeber.com.bo/bolivia/quien-fue-el-temible-zarate-willca-y-por-que-sucre-rechaza-que-figure-en-el-billete-de-bs-50_16835
+              date_published:
+                type: string
+                example: "2018-10-19"
+                description: Formato `AAAA/MM/DD`
+              rate:
+                type: number
+                example: 0.26381147
     EntitySearchResponse:
       type: object
       properties:

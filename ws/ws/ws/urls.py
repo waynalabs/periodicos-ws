@@ -25,8 +25,8 @@ urlpatterns = [
     path("api/article/", views.ArticleView.as_view(), name="article"),
     path("api/authorSearch", views.AuthorSearch.as_view(), name="authorSearch"),
     path("api/category/", views.CategoryView.as_view(), name="category"),
+    path("api/fullTextSearch", views.ArticlesTextSearch.as_view(), name="fullTextSearch"),
     path("api/namedEntitySearch", views.EntitySearch.as_view(), name="namedEntitySearch"),
-    
     
     path("schema/", get_schema_view(), name="schema"),
     #path("api/", include(router.urls))

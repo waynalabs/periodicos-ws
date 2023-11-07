@@ -171,3 +171,29 @@ group by c.name
 order by c.name
 
 select COUNT(*) from articles
+
+-- text search
+
+-- creation
+ALTER TABLE articles ADD COLUMN search_vector tsvector;
+UPDATE articles SET search_vector = to_tsvector('spanish', LOWER(title) || ' ' || content || ' ' || LOWER(description));
+CREATE INDEX articles_search_vector_idx ON articles USING gin(search_vector);
+-- queries
+SELECT id, title FROM articles WHERE search_vector @@ to_tsquery('Manfred');
+
+SELECT id, title, url, ts_rank(search_vector, plainto_tsquery('spanish', 'mandred reyes')) as rank
+	FROM articles
+	WHERE ts_rank(search_vector, plainto_tsquery('spanish', 'mandred reyes')) >= 0.09 AND search_vector @@ plainto_tsquery('spanish', 'mandred reyes') 
+	ORDER BY rank DESC;
+
+SELECT id, title, url, ts_rank(search_vector, plainto_tsquery('spanish', 'reyes villa')) as rank
+	FROM articles
+	WHERE ts_rank(search_vector, plainto_tsquery('spanish', 'reyes villa')) >= 0.09 AND search_vector @@ plainto_tsquery('spanish', 'reyes villa') 
+	ORDER BY rank DESC;
+
+-- SELECT id, title FROM articles WHERE search_vector @@ to_tsquery('english', 'search terms');
+
+
+SELECT * from articles LIMIT 5
+
+SELECT to_tsquery('Manfred')

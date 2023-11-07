@@ -18,7 +18,8 @@ from ws.serializers import NewspaperSerializer, NewspapersSerializer, \
     ArticlesSerializer, ArticleSerializer, \
     AuthorsSerializer, AuthorSearchSerializer, \
     EntitySearchSerializer, \
-    CategorySerializer
+    CategorySerializer, \
+    TextSearchArticlesSerializer
 
 
 def customJsonResponse(status_code=404, custom_message='Resource not found.', exception=None):
@@ -38,6 +39,7 @@ def api_root(request, format=None):
         "article": reverse("article", request=request),
         "authorSearch": reverse("authorSearch", request=request),
         "category": reverse("category", request=request),
+        "fullTextSearch": reverse("fullTextSearch", request=request),
         "namedEntitySearch": reverse("namedEntitySearch", request=request),
     })
 
@@ -282,7 +284,6 @@ class CategoryView(views.APIView, LimitOffsetPagination):
     
 class EntitySearch(views.APIView, LimitOffsetPagination):
 
-
     def get(self, request):
         self.max_limit = 2500
 
@@ -324,6 +325,56 @@ class EntitySearch(views.APIView, LimitOffsetPagination):
             "articles": results,
         })
         return Response(serializer.data)
+
+
+class ArticlesTextSearch(views.APIView, LimitOffsetPagination):
+
+    def get(self, request):
+        self.max_limit = 2500
+        search_text = request.query_params.get("searchText", ""). \
+                                          replace("'", "").replace("%", "")
+        rate = request.query_params.get("rate", "9")
+
+        if search_text == "":
+            return customJsonResponse(400, f"A searchText should be specified.")
+        if len(search_text) < 3 and len(search_text) > 750:
+            return customJsonResponse(400, f"The searchText length must be 3 to 750 characters.")
+        
+        try:
+            rate = int(rate)
+        except:
+            return customJsonResponse(400, f"Only a numeric rate is acepted between 1 and 100.")
+
+        if rate < 1 or rate > 100:
+            return customJsonResponse(400, f"Only a numeric rate is accepted between 1 and 100.")
+        
+        query_rate = rate/100
+
+        sql = f"""
+        SELECT id, title, url, date_published,
+          ts_rank(search_vector, plainto_tsquery('spanish', '{search_text.lower()}')) as rate
+	FROM articles
+	WHERE ts_rank(search_vector,
+          plainto_tsquery('spanish', '{search_text.lower()}')) >= {query_rate} 
+	  AND search_vector @@ plainto_tsquery('spanish', '{search_text.lower()}') 
+	ORDER BY rate DESC;
+        """
+
+        query_result = list(Articles.objects.raw(sql))
+
+        results = self.paginate_queryset(
+            query_result,
+            request, view=self
+        )
+        serializer = TextSearchArticlesSerializer({
+            "total": self.count,
+            "limit": self.limit,
+            "offset": self.offset,
+            "min_rate": rate,
+            "articles": results,
+        })
+        return Response(serializer.data)
+
     
 # class AuthorView(views.APIView, LimitOffsetPagination):
 
