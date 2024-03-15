@@ -24,6 +24,8 @@ CREATE TABLE articles(
       REFERENCES newspapers (id)
 );
 
+CREATE INDEX idx_articles_title ON articles(title);
+
 CREATE TABLE authors (
 	id SERIAL PRIMARY KEY,
 	name TEXT NOT NULL
@@ -81,3 +83,10 @@ CREATE TABLE ner_counts (
 -- DROP TABLE categories CASCADE;
 -- DROP TABLE articles_categories;
 -- DROP TABLE ner_counts;
+
+
+-- text search
+-- creation
+ALTER TABLE articles ADD COLUMN search_vector tsvector;
+UPDATE articles SET search_vector = to_tsvector('spanish', LOWER(title) || ' ' || content || ' ' || LOWER(description));
+CREATE INDEX articles_search_vector_idx ON articles USING gin(search_vector);

@@ -1,7 +1,8 @@
 # This file is part of periodicos-ws
-# Copyright Waynalabs 2023
+# Copyright Waynalabs 2023 (R)
 
 import os
+import click
 import sys
 module_path = os.path.abspath(os.path.join('..'))
 if module_path not in sys.path:
@@ -26,8 +27,6 @@ engine = create_engine(DATABASE_URL, echo=False)
 Base = declarative_base()
 
 ### TABLAS ###
-    
-
 class Newspapers(Base):
     __tablename__ = 'newspapers'
     id = Column(Integer, primary_key=True)
@@ -90,11 +89,12 @@ class NerCount(Base):
     entity_count = Column(Integer)
 
 
-    
-#Create a connection
-with engine.connect() as connection:
+def insert_articles_into_db(connection):
+    print(" ============== Inserting Articles to database ============")
+    print()
+    skipped = 0
+    inserted = 0
     # Loading every CSV file and inserting into the DB.
-
     for newspaper_name in datafiles_for_data_apps.keys():
         print()
         print("============================================")
@@ -110,13 +110,28 @@ with engine.connect() as connection:
                 print(f"newspaper found: {newspaper_id}")
             except Exception as E:
                 print(E)
-            
+
             if newspaper_id == 0:
-                print(f"Not found newspeper {newspaper_name}, skipping.)")
+                print(f"Not found newspaper {newspaper_name}, skipping.)")
                 continue
-            
+
             for index, row in df_norm.iterrows():
                 print(f"article - {index}/{len(df_norm)}: {row['title']}...")
+                if index % 500 == 0:
+                    print(f"inserted: {inserted}, skipped: {skipped}")
+
+                # Checking if the article exists
+                try:
+                    result = connection.execute(
+                        select(Articles)
+                        .where(Articles.title == row["title"]))
+                    if len(result.all()) > 0:
+                        skipped += 1
+                        continue
+                except Exception as E:
+                    print(f"Error getting article {row['title']}")
+                    print(E)
+
                 try:
                     description = ""
                     if "description" in row.keys():
@@ -133,7 +148,7 @@ with engine.connect() as connection:
                     )
                     cursor = connection.execute(insert_statement)
                     connection.commit()
-
+                    inserted += 1
                     result = connection.execute(select(Articles).
                                                           where(Articles.title == row["title"]))
                     article_id = result.first()._asdict()["id"]
@@ -167,7 +182,7 @@ with engine.connect() as connection:
                                 )
                                 connection.execute(insert_statement)
                                 connection.commit()
-                                    
+
                             except Exception as E:
                                 print(f"Error inserting category: {E}")
 
@@ -201,24 +216,28 @@ with engine.connect() as connection:
 
                         except Exception as E:
                             print(f"Error inserting author: {E}")
-                    
+
                     # TODO: Check new_agencies
-                    
                 except Exception as E:
                     print(f"Error on article: {E}")
+
         except Exception as E:
             print(f"ERROR reading newspaper {newspaper_name}")
             print(E)
             print()
 
     print("=====================================================")
-    print("Finished articles.")
-    print("Starting NER count to database.")
+    print("Finished articles insertion.")
+    
 
+def perform_ner_count(connection):
+    print("===============Starting NER count to database.===============")
+    skipped = 0
+    inserted = 0
     for newspaper_name in datafiles_for_data_apps.keys():
         print(f"Processing for {newspaper_name}**")
         for ner_count_file in datafiles_for_data_apps[newspaper_name]["ner_count_names"]:
-            print(f"File {ner_count_file}")
+            print(f"File {ner_count_file}------")
             df_nercount = pd.read_csv(ner_count_file)
 
             # ejemplo extraer description de eldeber_ner_count_description.csv
@@ -228,8 +247,10 @@ with engine.connect() as connection:
             article_id = 0
 
             for index, row in df_nercount.iterrows():
+                if (index % 400) == 0:
+                    print(f"Inserted: {inserted}, Skipped: {skipped}")
+
                 title = row['title']
-                print(f"{index}/{len(df_nercount)}: {title}")
 
                 if previous_title != title:
                     previous_title = title
@@ -242,8 +263,19 @@ with engine.connect() as connection:
                         print(f"Error with article '{row['title']}' --> {article_id}")
                         print(E)
                         continue
+
+                # Verificando que registro no existe
+                result = connection.execute(select(NerCount).
+                                            where(NerCount.article_id == article_id).
+                                            where(NerCount.entity == row["entity"]).
+                                            where(NerCount.article_field == article_field))
+                if len(result.all()) > 0:
+                    skipped += 1
+                    continue
+
                 # insertando registro
                 try:
+                    print(f"{index}/{len(df_nercount)}: {title}")
                     # csv tiene title, type, entity, count
                     insert_statement = insert(NerCount).values(
                         article_id=int(article_id),
@@ -254,16 +286,29 @@ with engine.connect() as connection:
                     )
                     cursor = connection.execute(insert_statement)
                     connection.commit()
-                    
+
+                    inserted += 1
                 except Exception as E:
                     print(f"Error inserting ner record: {row}")
                     print(E)
 
-    # Close the connection
-    connection.close()
 
-    print("Finished.")
+@click.command()
+@click.option("--insert_articles_to_db", "-i",
+              is_flag=True, help="Insert Articles to Database")
+@click.option("--ner_count", "-n",
+              is_flag=True, help="Run NER count")
+def cli(insert_articles_to_db, ner_count):
+    with engine.connect() as connection:
+        if insert_articles_to_db:
+            insert_articles_into_db(connection)
+        if ner_count:
+            perform_ner_count(connection)
+        # Close the connection
+        connection.close()
+        print("Finished.")
 
 
-
-
+if __name__ == "__main__":
+    print("====== import from csv ===========")
+    cli()

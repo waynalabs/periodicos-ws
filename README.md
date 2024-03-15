@@ -49,6 +49,12 @@ Para postgres 15 se pudo conectar a postgres modificando el password a algo mas 
 ALTER USER postgres WITH ENCRYPTED PASSWORD 'U1nP4as5-W@$ord';
 ```
 
+Para que la búsqueda de texto funcione correctamente se debería tener la base de datos en Locale `ES_es.utf8` y este locale debería estar previamente instalado en el sistema. Se puede crear la BD con este locale con:
+
+```
+CREATE DATABASE periodicos LOCALE 'es_ES.utf8' LC_CTYPE 'es_ES.utf8' LC_COLLATE 'es_ES.utf8' TEMPLATE template0;
+```
+
 ### Django + usgi + Nginx 
 
 [Una forma de deployar](https://medium.com/all-about-django/deploying-django-applications-in-production-with-uwsgi-and-nginx-78aac8c0f735)
@@ -118,3 +124,17 @@ server{
         }
 ```
 Reinciar nginx
+
+## Notas adicionales 
+
+Ejecutar notebook desde cli con papermill:
+
+```bash
+papermill <Notebook> <ruta_salida>
+```
+Ejemplo:
+```bash
+cd notebooks/eledeber
+papermill ./preprocessing.ipynb /tmp/papermill.ipynb
+
+```

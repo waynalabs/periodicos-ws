@@ -172,12 +172,6 @@ order by c.name
 
 select COUNT(*) from articles
 
--- text search
-
--- creation
-ALTER TABLE articles ADD COLUMN search_vector tsvector;
-UPDATE articles SET search_vector = to_tsvector('spanish', LOWER(title) || ' ' || content || ' ' || LOWER(description));
-CREATE INDEX articles_search_vector_idx ON articles USING gin(search_vector);
 -- queries
 SELECT id, title FROM articles WHERE search_vector @@ to_tsquery('Manfred');
 
