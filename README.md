@@ -43,6 +43,8 @@ Este servicio usa los datos generados durante el proceso ETL
 
 ![Proceso ETL](docs/ETL-Newspapers.jpg)
 
+Existe otro proyecto que se encarga del [procesamiento](https://gitlab.com/waynalabs/wayrunku-processing) de los datos generados.
+
 ## Notas deploy
 
 ### postgres y debian
