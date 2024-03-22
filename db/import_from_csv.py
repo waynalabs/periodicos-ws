@@ -100,6 +100,9 @@ def insert_articles_into_db(connection):
         print("============================================")
         print(f"=========={newspaper_name}==================")
         print("============================================")
+        # TODO: Insert as Bulk and with a given number of records as a batch
+        # Before performing the Bulk insert it might be good to drop indexes and recreate
+        # them after all bulk insertions.
         try:
             df_norm = pd.read_csv(datafiles_for_data_apps[newspaper_name]["normalized"])
 

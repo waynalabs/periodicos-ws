@@ -1,7 +1,5 @@
 # Servicio web noticias periódicos
 
-
-
 ## Instalación
 ```
 cd ws/
@@ -38,6 +36,12 @@ docker run --rm -p 8080:8080 -e 80 -e SWAGGER_JSON=/temp/openapi.json -v $(pwd):
 
 - Deploy con gninx uwsgi
 - Ajustar settings.py
+
+## Sobre el proceso ETL
+
+Este servicio usa los datos generados durante el proceso ETL
+
+![Proceso ETL](docs/ETL-Newspapers.jpg)
 
 ## Notas deploy
 
