@@ -163,6 +163,19 @@ class TextSearchArticlesSerializer(serializers.Serializer, pagination.PageNumber
 
     articles = ArticleTextSearchSerializer(many=True)
 
+
+class CategoryByMonthAndNewspaper(serializers.Serializer):
+    newspaper = serializers.CharField()
+    year_month = serializers.CharField()
+    category_name = serializers.CharField()
+    category_count = serializers.IntegerField()
+    
+    
+class CategoriesByMonthAndNewspaperSerializer(serializers.Serializer):
+    start_date = serializers.CharField()
+    end_date = serializers.CharField()
+    results = CategoryByMonthAndNewspaper(many=True)
+
     
 # class SnippetSerializer(serializers.HyperlinkedModelSerializer):
 #     owner = serializers.ReadOnlyField(source='owner.username')

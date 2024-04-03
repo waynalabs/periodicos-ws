@@ -185,7 +185,98 @@ SELECT id, title, url, ts_rank(search_vector, plainto_tsquery('spanish', 'reyes 
 	WHERE ts_rank(search_vector, plainto_tsquery('spanish', 'reyes villa')) >= 0.09 AND search_vector @@ plainto_tsquery('spanish', 'reyes villa') 
 	ORDER BY rank DESC;
 
+
+--- Top 5 categories by month. (provided by CHAT GPT mostly)
+with article_category_counts AS (
+    SELECT
+        a.newspaper_id,
+        cat.name as category_name, 
+        COUNT(*) AS category_count,
+        (EXTRACT(year from date_published) || '-' || EXTRACT(month from date_published)) as yrm
+    FROM
+        articles a
+	    LEFT JOIN articles_categories ac ON a.id = ac.article_id
+		LEFT JOIN categories cat ON ac.category_id = cat.id
+	WHERE date_published >= '2021-01-01' AND date_published < '2022-01-01' -- can change this
+    GROUP BY
+        a.newspaper_id, cat.name, (EXTRACT(year from date_published) || '-' || EXTRACT(month from date_published))
+	ORDER BY category_count DESC
+),
+ranked_categories AS (
+	SELECT *, ROW_NUMBER() OVER (PARTITION BY newspaper_id, yrm ORDER BY category_count DESC) AS cat_rank
+	FROM article_category_counts
+)
+SELECT n.name as newspaper_name, rc.yrm, rc.category_name, rc.category_count
+FROM ranked_categories rc
+	JOIN newspapers n ON rc.newspaper_id = n.id
+	JOIN categories c ON  rc.category_name = c.name
+WHERE rc.cat_rank <= 5
+ORDER BY rc.yrm DESC
+
+--- Top 3 categories by month and newspaper
+with article_category_counts AS (
+    SELECT
+        a.newspaper_id,
+        cat.name as category_name, 
+        COUNT(*) AS category_count,
+        (EXTRACT(year from date_published) || '-' || EXTRACT(month from date_published)) as yrm
+    FROM
+        articles a
+		LEFT JOIN newspapers n ON n.id = a.newspaper_id
+	    LEFT JOIN articles_categories ac ON a.id = ac.article_id
+		LEFT JOIN categories cat ON ac.category_id = cat.id
+	WHERE date_published >= '2021-01-01' AND date_published < '2022-01-01' -- can change
+		AND n.name = 'El Deber' -- can change this
+    GROUP BY
+        a.newspaper_id, cat.name, (EXTRACT(year from date_published) || '-' || EXTRACT(month from date_published))
+	ORDER BY category_count DESC
+),
+ranked_categories AS (
+	SELECT *, ROW_NUMBER() OVER (PARTITION BY newspaper_id, yrm ORDER BY category_count DESC) AS cat_rank
+	FROM article_category_counts
+)
+SELECT n.name as newspaper_name, rc.yrm, rc.category_name, rc.category_count
+FROM ranked_categories rc
+	JOIN newspapers n ON rc.newspaper_id = n.id
+	JOIN categories c ON  rc.category_name = c.name
+WHERE rc.cat_rank <= 3
+ORDER BY rc.yrm DESC;
+
+
+--- Top 3 authors by month and newspaper
+with article_author_counts AS (
+    SELECT
+        a.newspaper_id,
+        au.name as author_name, 
+        COUNT(*) AS author_count,
+        (EXTRACT(year from date_published) || '-' || EXTRACT(month from date_published)) as yrm
+    FROM
+        articles a
+	LEFT JOIN articles_authors aa ON a.id = aa.article_id
+	LEFT JOIN authors au ON aa.author_id = au.id
+      WHERE au.name is not null 
+	AND date_published >= '2021-01-01' AND date_published < '2022-01-01' -- change this
+	AND a.newspaper_id = 1  -- can change this
+    GROUP BY
+        a.newspaper_id, au.name, (EXTRACT(year from date_published) || '-' || EXTRACT(month from date_published))
+	ORDER BY author_count DESC
+),
+ranked_authors AS (
+	SELECT *, ROW_NUMBER() OVER (PARTITION BY newspaper_id, yrm ORDER BY author_count DESC) AS author_rank
+	FROM article_author_counts
+)
+SELECT n.name as newspaper_name, rc.yrm, rc.author_name, rc.author_count
+FROM ranked_authors rc
+	JOIN newspapers n ON rc.newspaper_id = n.id
+	JOIN authors a ON  rc.author_name = a.name
+WHERE rc.author_rank <= 3
+ORDER BY rc.yrm DESC
+
+
+
+----------------- To create search vectors (execute when all DB is built) --------------------------
 -- SELECT id, title FROM articles WHERE search_vector @@ to_tsquery('english', 'search terms');
+----------------------------------------------------------------------------------------------------
 
 
 SELECT * from articles LIMIT 5

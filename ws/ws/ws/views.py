@@ -19,7 +19,8 @@ from ws.serializers import NewspaperSerializer, NewspapersSerializer, \
     AuthorsSerializer, AuthorSearchSerializer, \
     EntitySearchSerializer, \
     CategorySerializer, \
-    TextSearchArticlesSerializer
+    TextSearchArticlesSerializer, \
+    CategoriesByMonthAndNewspaperSerializer
 
 
 def customJsonResponse(status_code=404, custom_message='Resource not found.', exception=None):
@@ -39,6 +40,7 @@ def api_root(request, format=None):
         "article": reverse("article", request=request),
         "authorSearch": reverse("authorSearch", request=request),
         "category": reverse("category", request=request),
+        "topCategoriesByMonth": reverse("topCategoriesByMonth", request=request),
         "fullTextSearch": reverse("fullTextSearch", request=request),
         "namedEntitySearch": reverse("namedEntitySearch", request=request),
     })
@@ -375,6 +377,76 @@ class ArticlesTextSearch(views.APIView, LimitOffsetPagination):
         })
         return Response(serializer.data)
 
+
+class TopCategoriesByMonthAndNewspaper(views.APIView):
+
+    def get(self, request):
+        newspaper = request.query_params.get("newspaper", "El Deber") \
+                                        .replace("'", "").replace("%", "")
+        start_date = request.query_params.get("startDate", None)
+        end_date = request.query_params.get("endDate", None)
+
+        # TODO: Validate date params
+
+        if start_date is None:
+            return customJsonResponse(400, "Must specify startDate in YYYY-MM-DD format")
+        if end_date is None:
+            return customJsonResponse(400, "Must specify endDate in YYYY-MM-DD format")
+
+        where_statement = f"""
+          date_published >= '{start_date}' AND date_published < '{end_date}'
+          AND n.name = '{newspaper}'
+        """
+        try:
+            sql = f"""
+            with article_category_counts AS (
+                SELECT
+                    a.newspaper_id,
+                    cat.name as category_name, 
+                    COUNT(*) AS category_count,
+                    (EXTRACT(year from date_published)||'-'||
+                     EXTRACT(month from date_published)) as yrm
+                FROM
+                    articles a
+            		LEFT JOIN newspapers n ON n.id = a.newspaper_id
+            	    LEFT JOIN articles_categories ac ON a.id = ac.article_id
+            		LEFT JOIN categories cat ON ac.category_id = cat.id
+            	WHERE {where_statement}
+                GROUP BY
+                    a.newspaper_id, cat.name,
+                      (EXTRACT(year from date_published)||'-'||
+                       EXTRACT(month from date_published))
+            	ORDER BY category_count DESC
+            ),
+            ranked_categories AS (
+            	SELECT *, ROW_NUMBER() OVER (PARTITION BY newspaper_id,
+                  yrm ORDER BY category_count DESC) AS cat_rank
+            	FROM article_category_counts
+            )
+            SELECT n.id, n.name as newspaper, rc.yrm AS year_month,
+              rc.category_name, rc.category_count
+            FROM ranked_categories rc
+            	JOIN newspapers n ON rc.newspaper_id = n.id
+            	JOIN categories c ON  rc.category_name = c.name
+            WHERE rc.cat_rank <= 3
+            ORDER BY rc.yrm DESC;            
+            """
+            query_result = list(Newspapers.objects.raw(sql))
+            serializer = CategoriesByMonthAndNewspaperSerializer({
+                "start_date": start_date,
+                "end_date": end_date,
+                "results": query_result
+            })
+            return Response(serializer.data)
+        except Exception as E:
+            print(E)
+            return customJsonResponse(500, "Error occured during the query.")
+        
+
+    #     newspaper = serializers.CharField()
+    # year_month = serializers.CharField()
+    # category = serializers.CharField()
+    # count = serializers.IntegerField()
     
 # class AuthorView(views.APIView, LimitOffsetPagination):
 
