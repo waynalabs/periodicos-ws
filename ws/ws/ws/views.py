@@ -20,11 +20,12 @@ from ws.serializers import NewspaperSerializer, NewspapersSerializer, \
     EntitySearchSerializer, \
     CategorySerializer, \
     TextSearchArticlesSerializer, \
-    CategoriesByMonthAndNewspaperSerializer
+    CategoriesByMonthAndNewspaperSerializer, \
+    AuthorsByMonthAndNewspaper
 
 
 def customJsonResponse(status_code=404, custom_message='Resource not found.', exception=None):
-    """Returns a Json respone with a given status code""" 
+    """Returns a Json respone with a given status code"""
     return JsonResponse({
         'status_code': status_code,
         'custom_message': custom_message
@@ -41,6 +42,7 @@ def api_root(request, format=None):
         "authorSearch": reverse("authorSearch", request=request),
         "category": reverse("category", request=request),
         "topCategoriesByMonth": reverse("topCategoriesByMonth", request=request),
+        "topAuthorsByMonth": reverse("topAuthorsByMonth", request=request),
         "fullTextSearch": reverse("fullTextSearch", request=request),
         "namedEntitySearch": reverse("namedEntitySearch", request=request),
     })
@@ -77,7 +79,7 @@ class NewspaperView(views.APIView):
             COUNT(DISTINCT cat.id) AS categories_count,
             COUNT(DISTINCT au.id) AS author_count,
         	ARRAY_REMOVE(ARRAY_AGG(DISTINCT(cat.name)), NULL) AS categories,
-        	ARRAY_REMOVE(ARRAY_AGG(DISTINCT(au.name)), NULL) AS authors
+        	ARRAY_REMOVE(ARRAY_AGG(DISTINCT(au.ame)), NULL) AS authors
         FROM
             newspapers n
         LEFT JOIN articles a ON n.id = a.newspaper_id
@@ -397,40 +399,41 @@ class TopCategoriesByMonthAndNewspaper(views.APIView):
           date_published >= '{start_date}' AND date_published < '{end_date}'
           AND n.name = '{newspaper}'
         """
+        sql = f"""
+        with article_category_counts AS (
+            SELECT
+                a.newspaper_id,
+                cat.name as category_name, 
+                COUNT(*) AS category_count,
+                (EXTRACT(year from date_published)||'-'||
+                 EXTRACT(month from date_published)) as yrm
+            FROM
+                articles a
+        	    LEFT JOIN newspapers n ON n.id = a.newspaper_id
+        	    LEFT JOIN articles_categories ac ON a.id = ac.article_id
+        	    LEFT JOIN categories cat ON ac.category_id = cat.id
+        	WHERE {where_statement}
+            GROUP BY
+                a.newspaper_id, cat.name,
+                  (EXTRACT(year from date_published)||'-'||
+                   EXTRACT(month from date_published))
+        	ORDER BY category_count DESC
+        ),
+        ranked_categories AS (
+        	SELECT *, ROW_NUMBER() OVER (PARTITION BY newspaper_id,
+              yrm ORDER BY category_count DESC) AS cat_rank
+        	FROM article_category_counts
+        )
+        SELECT n.id, n.name as newspaper, rc.yrm AS year_month,
+          rc.category_name, rc.category_count
+        FROM ranked_categories rc
+        	JOIN newspapers n ON rc.newspaper_id = n.id
+        	JOIN categories c ON  rc.category_name = c.name
+        WHERE rc.cat_rank <= 3
+        ORDER BY rc.yrm DESC;            
+        """
         try:
-            sql = f"""
-            with article_category_counts AS (
-                SELECT
-                    a.newspaper_id,
-                    cat.name as category_name, 
-                    COUNT(*) AS category_count,
-                    (EXTRACT(year from date_published)||'-'||
-                     EXTRACT(month from date_published)) as yrm
-                FROM
-                    articles a
-            		LEFT JOIN newspapers n ON n.id = a.newspaper_id
-            	    LEFT JOIN articles_categories ac ON a.id = ac.article_id
-            		LEFT JOIN categories cat ON ac.category_id = cat.id
-            	WHERE {where_statement}
-                GROUP BY
-                    a.newspaper_id, cat.name,
-                      (EXTRACT(year from date_published)||'-'||
-                       EXTRACT(month from date_published))
-            	ORDER BY category_count DESC
-            ),
-            ranked_categories AS (
-            	SELECT *, ROW_NUMBER() OVER (PARTITION BY newspaper_id,
-                  yrm ORDER BY category_count DESC) AS cat_rank
-            	FROM article_category_counts
-            )
-            SELECT n.id, n.name as newspaper, rc.yrm AS year_month,
-              rc.category_name, rc.category_count
-            FROM ranked_categories rc
-            	JOIN newspapers n ON rc.newspaper_id = n.id
-            	JOIN categories c ON  rc.category_name = c.name
-            WHERE rc.cat_rank <= 3
-            ORDER BY rc.yrm DESC;            
-            """
+
             query_result = list(Newspapers.objects.raw(sql))
             serializer = CategoriesByMonthAndNewspaperSerializer({
                 "start_date": start_date,
@@ -443,6 +446,70 @@ class TopCategoriesByMonthAndNewspaper(views.APIView):
             return customJsonResponse(500, "Error occured during the query.")
         
 
+class TopAuthorsByMonthAndNewspaper(views.APIView):
+
+    def get(self, request):
+        newspaper = request.query_params.get("newspaper", "El Deber") \
+                                        .replace("'", "").replace("%", "")
+        start_date = request.query_params.get("startDate", None)
+        end_date = request.query_params.get("endDate", None)
+
+        # TODO: Validate date params
+
+        if start_date is None:
+            return customJsonResponse(400, "Must specify startDate in YYYY-MM-DD format")
+        if end_date is None:
+            return customJsonResponse(400, "Must specify endDate in YYYY-MM-DD format")
+
+        where_statement = f"""
+          au.name is not null AND
+          date_published >= '{start_date}' AND date_published < '{end_date}'
+          AND n.name = '{newspaper}'
+        """
+        sql = f"""
+        with article_author_counts AS (
+            SELECT
+                a.newspaper_id,
+                au.name as author_name, 
+                COUNT(*) AS author_count,
+                (EXTRACT(year from date_published) || '-' ||
+                 EXTRACT(month from date_published)) as yrm
+            FROM
+                articles a
+                LEFT JOIN newspapers n ON n.id = a.newspaper_id
+        	LEFT JOIN articles_authors aa ON a.id = aa.article_id
+        	LEFT JOIN authors au ON aa.author_id = au.id
+              WHERE {where_statement}
+            GROUP BY
+                a.newspaper_id, au.name,
+                (EXTRACT(year from date_published) || '-' || EXTRACT(month from date_published))
+        	ORDER BY author_count DESC
+        ),
+        ranked_authors AS (
+        	SELECT *, ROW_NUMBER() OVER (PARTITION BY newspaper_id,
+                            yrm ORDER BY author_count DESC) AS author_rank
+        	FROM article_author_counts
+        )
+        SELECT n.id, n.name as newspaper, rc.yrm AS year_month, rc.author_name,
+               rc.author_count
+            FROM ranked_authors rc
+        	JOIN newspapers n ON rc.newspaper_id = n.id
+        	JOIN authors a ON  rc.author_name = a.name
+            WHERE rc.author_rank <= 3
+        ORDER BY rc.yrm DESC     
+        """
+        try:
+            query_result = list(Newspapers.objects.raw(sql))
+            serializer = AuthorsByMonthAndNewspaper({
+                "start_date": start_date,
+                "end_date": end_date,
+                "results": query_result
+            })
+            return Response(serializer.data)
+        except Exception as E:
+            print(E)
+            return customJsonResponse(500, "Error ocurrend during query.")
+        
     #     newspaper = serializers.CharField()
     # year_month = serializers.CharField()
     # category = serializers.CharField()

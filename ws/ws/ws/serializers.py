@@ -176,6 +176,19 @@ class CategoriesByMonthAndNewspaperSerializer(serializers.Serializer):
     end_date = serializers.CharField()
     results = CategoryByMonthAndNewspaper(many=True)
 
+
+class AuthorByMonthAndNewspaper(serializers.Serializer):
+    newspaper = serializers.CharField()
+    year_month = serializers.CharField()
+    author_name = serializers.CharField()
+    author_count = serializers.IntegerField()
+
+
+class AuthorsByMonthAndNewspaper(serializers.Serializer):
+    start_date = serializers.CharField()
+    end_date = serializers.CharField()
+    results = AuthorByMonthAndNewspaper(many=True)
+
     
 # class SnippetSerializer(serializers.HyperlinkedModelSerializer):
 #     owner = serializers.ReadOnlyField(source='owner.username')

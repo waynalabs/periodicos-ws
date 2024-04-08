@@ -24,7 +24,7 @@
     },
     {
       "name": "newspaper",
-      "description": "Información mas detallada de periódico en específico"
+      "description": "Información mas detallada de periódico en específico."
     },
     {
       "name": "articles",
@@ -41,6 +41,14 @@
     {
       "name": "category",
       "description": "Artículos correspondientes a una categoría dada."
+    },
+    {
+      "name": "top categories by month",
+      "description": "Las tres categorías con más artículos por cada mes por cada periódico."
+    },
+    {
+      "name": "top authors by month",
+      "description": "Los tres autores que escribieron la mayor cantidad de artículos cada mes por periódico."
     },
     {
       "name": "full text search",
@@ -317,6 +325,124 @@
             }
           },
           "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/topCategoriesByMonth": {
+      "get": {
+        "tags": [
+          "top categories by month"
+        ],
+        "summary": "Las tres categorías con más aartículos por cada mes de in periódico particular.",
+        "description": "Dada una fecha de inicio y finalizacíon, retorna un conteo con las tres categorías con más artículos por cada mes de un periódico dado.",
+        "operationId": "topCategoriesByMonth",
+        "parameters": [
+          {
+            "name": "newspaper",
+            "in": "query",
+            "description": "Nombre del periódico",
+            "required": false,
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "El Deber"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "2019-01-01"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "Para devolver resultados **hasta** esta fecha. Formato `AAAA/MM/DD`",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "2020-01-01"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conteno de categorías por mes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopCategoriesByMonthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/topAuthorsByMonth": {
+      "get": {
+        "tags": [
+          "top authors by month"
+        ],
+        "summary": "Los tres autores con más aartículos por cada mes de in periódico particular.",
+        "description": "Dada una fecha de inicio y finalizacíon, retorna un conteo con los tres autores con más artículos por cada mes de un periódico dado.",
+        "operationId": "topAuthorsByMonth",
+        "parameters": [
+          {
+            "name": "newspaper",
+            "in": "query",
+            "description": "Nombre del periódico",
+            "required": false,
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "El Deber"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "2019-01-01"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "Para devolver resultados **hasta** esta fecha. Formato `AAAA/MM/DD`",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "2020-01-01"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conteno de autores por mes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopAuthorsByMonthResponse"
+                }
+              }
+            }
+          },
+          "400": {
             "description": "Invalid input"
           }
         }
@@ -766,6 +892,92 @@
                   "type": "string",
                   "description": "Fecha de publicación del artículo. Formato `YYYY-MM-DD`",
                   "example": "2023-04-04"
+                }
+              }
+            }
+          }
+        }
+      },
+      "TopCategoriesByMonthResponse": {
+        "type": "object",
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "description": "Fecha de inicio de la consulta. Formato `YYYY-MM-DD`",
+            "example": "2020-01-01"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "Fecha de finalización de la consulta. Formato `YYYY-MM-DD`",
+            "example": "2021-01-01"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "newspaper": {
+                  "type": "string",
+                  "description": "Nombre del periódico",
+                  "example": "El Deber"
+                },
+                "year_month": {
+                  "type": "string",
+                  "description": "Año y Mes del resultado actual",
+                  "example": "2021-09"
+                },
+                "category_name": {
+                  "type": "string",
+                  "description": "Nombre de la categoría",
+                  "example": "nacional"
+                },
+                "category_count": {
+                  "type": "number",
+                  "description": "Número de artículos que pertenecen a la categoría en el mes y año.",
+                  "example": 272
+                }
+              }
+            }
+          }
+        }
+      },
+      "TopAuthorsByMonthResponse": {
+        "type": "object",
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "description": "Fecha de inicio de la consulta. Formato `YYYY-MM-DD`",
+            "example": "2020-01-01"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "Fecha de finalización de la consulta. Formato `YYYY-MM-DD`",
+            "example": "2021-01-01"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "newspaper": {
+                  "type": "string",
+                  "description": "Nombre del periódico",
+                  "example": "El Deber"
+                },
+                "year_month": {
+                  "type": "string",
+                  "description": "Año y Mes del resultado actual",
+                  "example": "2021-09"
+                },
+                "author_name": {
+                  "type": "string",
+                  "description": "Nombre del autor",
+                  "example": "Eduardo Lander"
+                },
+                "author_count": {
+                  "type": "number",
+                  "description": "Número de artículos que escribió el autor en el mes indicado",
+                  "example": 45
                 }
               }
             }

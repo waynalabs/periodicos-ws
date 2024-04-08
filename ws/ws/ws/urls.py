@@ -28,6 +28,9 @@ urlpatterns = [
     path("api/topCategoriesByMonth",
          views.TopCategoriesByMonthAndNewspaper.as_view(),
          name='topCategoriesByMonth'),
+    path("api/topAuthorsByMonth",
+         views.TopAuthorsByMonthAndNewspaper.as_view(),
+         name="topAuthorsByMonth"),
     path("api/fullTextSearch", views.ArticlesTextSearch.as_view(), name="fullTextSearch"),
     path("api/namedEntitySearch", views.EntitySearch.as_view(), name="namedEntitySearch"),
     
