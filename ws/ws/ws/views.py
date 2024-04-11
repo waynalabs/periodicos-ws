@@ -21,7 +21,8 @@ from ws.serializers import NewspaperSerializer, NewspapersSerializer, \
     CategorySerializer, \
     TextSearchArticlesSerializer, \
     CategoriesByMonthAndNewspaperSerializer, \
-    AuthorsByMonthAndNewspaper
+    AuthorsByMonthAndNewspaper, \
+    ArticlesCountByDay
 
 
 def customJsonResponse(status_code=404, custom_message='Resource not found.', exception=None):
@@ -41,6 +42,7 @@ def api_root(request, format=None):
         "article": reverse("article", request=request),
         "authorSearch": reverse("authorSearch", request=request),
         "category": reverse("category", request=request),
+        "articlesCountByDay": reverse("articlesCountByDay", request=request),
         "topCategoriesByMonth": reverse("topCategoriesByMonth", request=request),
         "topAuthorsByMonth": reverse("topAuthorsByMonth", request=request),
         "fullTextSearch": reverse("fullTextSearch", request=request),
@@ -380,6 +382,42 @@ class ArticlesTextSearch(views.APIView, LimitOffsetPagination):
         return Response(serializer.data)
 
 
+class ArticlesCountByDayView(views.APIView):
+
+    def get(self, request):
+        start_date = request.query_params.get("startDate", None)
+        end_date = request.query_params.get("endDate", None)
+
+        # TODO: Validate date params
+        if start_date is None:
+            return customJsonResponse(400, "Must specify startDate in YYYY-MM-DD format")
+        if end_date is None:
+            return customJsonResponse(400, "Must specify endDate in YYYY-MM-DD format")
+
+        where_statement = f"""
+          date_published >= '{start_date}' AND date_published < '{end_date}'
+        """
+        sql = f"""
+          SELECT n.id, n.name as newspaper, date_published, COUNT(*) 
+          FROM articles a
+          	LEFT JOIN newspapers n ON a.newspaper_id = n.id
+          WHERE {where_statement}
+          GROUP BY date_published, n.name, n.id
+          ORDER BY date_published ASC        
+        """
+        try:
+            query_result = list(Newspapers.objects.raw(sql))
+            serializer = ArticlesCountByDay({
+                "start_date": start_date,
+                "end_date": end_date,
+                "results": query_result
+            })
+            return Response(serializer.data)
+        except Exception as E:
+            print(E)
+            return customJsonResponse(500, "Error occured during the query.")        
+
+    
 class TopCategoriesByMonthAndNewspaper(views.APIView):
 
     def get(self, request):

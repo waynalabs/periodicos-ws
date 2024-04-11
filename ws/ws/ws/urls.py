@@ -25,6 +25,8 @@ urlpatterns = [
     path("api/article/", views.ArticleView.as_view(), name="article"),
     path("api/authorSearch", views.AuthorSearch.as_view(), name="authorSearch"),
     path("api/category/", views.CategoryView.as_view(), name="category"),
+    path("api/articlesCountByDay", views.ArticlesCountByDayView.as_view(),
+         name="articlesCountByDay"),
     path("api/topCategoriesByMonth",
          views.TopCategoriesByMonthAndNewspaper.as_view(),
          name='topCategoriesByMonth'),

@@ -272,6 +272,22 @@ FROM ranked_authors rc
 WHERE rc.author_rank <= 3
 ORDER BY rc.yrm DESC
 
+--- Articles count per each deay
+SELECT date_published, COUNT(*) 
+FROM articles a
+	LEFT JOIN newspapers n ON a.newspaper_id = n.id
+WHERE n.name = 'El Deber' AND date_published >= '2021-01-01' AND date_published < '2022-01-01'
+GROUP BY date_published
+ORDER BY date_published ASC
+
+--- Articles count per day for all newspapers
+
+SELECT n.name, date_published, COUNT(*) 
+FROM articles a
+	LEFT JOIN newspapers n ON a.newspaper_id = n.id
+WHERE date_published >= '2021-01-01' AND date_published < '2023-01-01'
+GROUP BY date_published, n.name
+ORDER BY date_published ASC
 
 
 ----------------- To create search vectors (execute when all DB is built) --------------------------
