@@ -26,6 +26,8 @@ tags:
     description: Búsqueda de autores a partir de un nombre dado.
   - name: category
     description: Artículos correspondientes a una categoría dada.
+  - name: articles count by day
+    description: Conteo de artículos por cada día para todos los periódicos.
   - name: top categories by month
     description: Las tres categorías con más artículos por cada mes por cada periódico.
   - name: top authors by month
@@ -217,6 +219,36 @@ paths:
                 $ref: '#/components/schemas/AuthorSearchResponse'
         '405':
           description: Invalid input
+  /articlesCountByDay:
+    get:
+      tags:
+        - count
+      summary: Retorna el conteo de artículos por cada día de todos los periódicos.
+      description: Dada una fecha de inicio y finalización, retorna el conteo de los artículos publicados por periódico y día.
+      operationId: articlesCountByDay
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+            example: "2019-01-01"
+        - name: endDate
+          in: query
+          description: Para devolver resultados **hasta** esta fecha. Formato `AAAA/MM/DD`
+          required: true
+          explode: false
+          schema:
+            type: string
+            example: "2020-01-01"
+      responses:
+        '200':
+          description: Conteo de artículos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticlesCountByDayResponse'
   /topCategoriesByMonth:
     get:
       tags:
@@ -649,7 +681,7 @@ components:
                 type: number
                 description: Número de artículos que pertenecen a la categoría en el mes y año.
                 example: 272
-    TopAuthorsByMonthResponse:
+    TopCategoriesByMonthResponse:
       type: object
       properties:
         start_date:
@@ -673,14 +705,42 @@ components:
                 type: string
                 description: Año y Mes del resultado actual
                 example: 2021-09
-              author_name:
+              category_name:
                 type: string
-                description: Nombre del autor
-                example: Eduardo Lander
-              author_count:
+                description: Nombre de la categoría
+                example: nacional
+              category_count:
                 type: number
-                description: Número de artículos que escribió el autor en el mes indicado
-                example: 45
+                description: Número de artículos que pertenecen a la categoría en el mes y año.
+                example: 272
+    ArticlesCountByDayResponse:
+      type: object
+      properties:
+        start_date:
+          type: string
+          description: Fecha de inicio de la consulta. Formato `YYYY-MM-DD`
+          example: "2020-01-01"
+        end_date:
+          type: string
+          description: Fecha de finalización de la consulta. Formato `YYYY-MM-DD`
+          example: "2021-01-01"
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              newspaper:
+                type: string
+                description: Nombre del periódico
+                example: El Deber
+              date_published:
+                type: string
+                description: Día en formato `YYYY-MM-DD`
+                example: 2021-09-09
+              count:
+                type: integer
+                description: Cantidad de artículos publicados en ese día
+                example: 7
     FullTextSearchResponse:
       type: object
       properties:
