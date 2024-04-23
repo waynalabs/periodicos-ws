@@ -81,7 +81,7 @@ class NewspaperView(views.APIView):
             COUNT(DISTINCT cat.id) AS categories_count,
             COUNT(DISTINCT au.id) AS author_count,
         	ARRAY_REMOVE(ARRAY_AGG(DISTINCT(cat.name)), NULL) AS categories,
-        	ARRAY_REMOVE(ARRAY_AGG(DISTINCT(au.ame)), NULL) AS authors
+        	ARRAY_REMOVE(ARRAY_AGG(DISTINCT(au.name)), NULL) AS authors
         FROM
             newspapers n
         LEFT JOIN articles a ON n.id = a.newspaper_id
