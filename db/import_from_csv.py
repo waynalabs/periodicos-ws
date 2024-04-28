@@ -16,6 +16,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy import insert, select
+from sqlalchemy import text
 
 
 DATABASE_URL = "postgresql://postgres:postgres@localhost/periodicos"
@@ -300,20 +301,42 @@ def perform_ner_count(connection):
 def update_indexes(connection):
     print("==== Updating indexes ======")
     try:
-        result = connection.execute(f"""
-        -- indices
-        DROP INDEX idx_articles_title;
-        CREATE INDEX idx_articles_title ON articles(title);        
+        result = connection.execute(text("DROP INDEX idx_articles_title"))
+        print(result.all)
+    except Exception as E:
+        print("Error occurred while dropping idx_articles_title")
 
-        -- search vector
-        UPDATE articles SET search_vector = to_tsvector('spanish', LOWER(title) || ' ' || content || ' ' || LOWER(description));
-        DROP INDEX articles_search_vector_idx
-        CREATE INDEX articles_search_vector_idx ON articles USING gin(search_vector);
-        """)
-        print(result)
+    try:
+        result = connection.execute(text("CREATE INDEX idx_articles_title ON articles(title)"))
+        print(result.all)
+    except Exception as E:
+        print("Error occurred on: CREATE INDEX idx_articles_title ON articles(title)")
+        print(E)
+
+    try:
+        result = connection.execute(text("""
+        UPDATE articles SET search_vector =
+          to_tsvector('spanish', LOWER(title)||' '||content||' '||LOWER(description))"""))
+        print(result.all)
+    except Exception as E:
+        print("Error occurred updating search_vector")
+        print(E)
+
+    try:
+        result = connection.execute(text("DROP INDEX articles_search_vector_idx"))
+        print(result.all)
+    except Exception as E:
+        print("Error occurred on: DROP INDEX articles_search_vector_idx")
+        print(E)
+
+    try:
+        result = connection.execute(text("""
+        CREATE INDEX articles_search_vector_idx ON articles USING gin(search_vector)
+        """))
+        print(result.all)
         print("Finished updating indexes")
     except Exception as E:
-        print("Error occurred updating DB index")
+        print("Error occurred on: CREATE INDEX articles_search_vector_idx ON articles USING gin(search_vector)")
         print(E)
 
 
