@@ -230,6 +230,7 @@ def insert_articles_into_db(connection):
             print()
 
     print("=====================================================")
+    print(f"Inserted: {inserted}")
     print("Finished articles insertion.")
     
 
@@ -296,6 +297,26 @@ def perform_ner_count(connection):
                     print(E)
 
 
+def update_indexes(connection):
+    print("==== Updating indexes ======")
+    try:
+        result = connection.execute(f"""
+        -- indices
+        DROP INDEX idx_articles_title;
+        CREATE INDEX idx_articles_title ON articles(title);        
+
+        -- search vector
+        UPDATE articles SET search_vector = to_tsvector('spanish', LOWER(title) || ' ' || content || ' ' || LOWER(description));
+        DROP INDEX articles_search_vector_idx
+        CREATE INDEX articles_search_vector_idx ON articles USING gin(search_vector);
+        """)
+        print(result)
+        print("Finished updating indexes")
+    except Exception as E:
+        print("Error occurred updating DB index")
+        print(E)
+
+
 @click.command()
 @click.option("--insert_articles_to_db", "-i",
               is_flag=True, help="Insert Articles to Database")
@@ -307,6 +328,8 @@ def cli(insert_articles_to_db, ner_count):
             insert_articles_into_db(connection)
         if ner_count:
             perform_ner_count(connection)
+        update_indexes(connection)
+        
         # Close the connection
         connection.close()
         print("Finished.")
