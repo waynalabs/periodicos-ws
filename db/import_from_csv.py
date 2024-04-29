@@ -15,7 +15,7 @@ from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, update, func
 from sqlalchemy import text
 
 
@@ -32,6 +32,8 @@ class Newspapers(Base):
     __tablename__ = 'newspapers'
     id = Column(Integer, primary_key=True)
     name = Column(String)
+    min_date = Column(Date)
+    max_date = Column(Date)
     articles = relationship("Articles", backref="newspapers")
 
 
@@ -233,7 +235,7 @@ def insert_articles_into_db(connection):
     print("=====================================================")
     print(f"Inserted: {inserted}")
     print("Finished articles insertion.")
-    
+
 
 def perform_ner_count(connection):
     print("===============Starting NER count to database.===============")
@@ -300,34 +302,88 @@ def perform_ner_count(connection):
 
 def update_indexes(connection):
     print("==== Updating indexes ======")
+
+    print(" Min Max Date by newspaper Update.")
+    # Update min_date and max_date for each newspaper
+    min_max_results = None
+    try:
+        result = connection.execute(
+            text("""
+              SELECT MAX(date_published), MIN(date_published), newspaper_id
+              FROM articles
+              GROUP BY newspaper_id
+              ORDER BY newspaper_id
+            """))
+        min_max_results = result.all()
+        print(result.all())
+        # Retorna
+        # [(datetime.date(2024, 3, 19), datetime.date(2015, 1, 1), 1),
+        # (datetime.date(2023, 10, 27), datetime.date(2018, 8, 23), 2),
+        # (datetime.date(2023, 12, 2), datetime.date(2022, 5, 9), 3)]
+
+        
+        # Updating max min from newspapers
+        # result = connection.execute(
+        #     select(func.max(Articles.date_published), Articles.newspaper_id)) \
+        #     .group_by(Articles.newspaper_id)
+        # print("-----")
+    except Exception as E:
+        print("Error updating newspapers min max")
+        print(E)
+        raise E
+
+    try:
+        for row in min_max_results:
+            print(row)
+            # TODO terminar
+            insert_statement = update(Newspapers).where(
+                Newspapers.id==row[2] # newspaper_id
+            ).values(
+                max_date = row[0],
+                min_date = row[1],
+            )
+            print(insert_statement)
+            cursor = connection.execute(insert_statement)
+            connection.commit()
+            print(f"Updated {row}")
+    except Exception as E:
+        print("Error updating newspapers min max")
+        print(E)
+        raise E
+
     try:
         result = connection.execute(text("DROP INDEX idx_articles_title"))
-        print(result.all)
+        print(result)
     except Exception as E:
         print("Error occurred while dropping idx_articles_title")
+        print(E)
+        raise E
 
     try:
         result = connection.execute(text("CREATE INDEX idx_articles_title ON articles(title)"))
-        print(result.all)
+        print(result)
     except Exception as E:
         print("Error occurred on: CREATE INDEX idx_articles_title ON articles(title)")
         print(E)
+        raise E
 
     try:
         result = connection.execute(text("""
         UPDATE articles SET search_vector =
           to_tsvector('spanish', LOWER(title)||' '||content||' '||LOWER(description))"""))
-        print(result.all)
+        print(result)
     except Exception as E:
         print("Error occurred updating search_vector")
         print(E)
+        raise E
 
     try:
         result = connection.execute(text("DROP INDEX articles_search_vector_idx"))
-        print(result.all)
+        print(result)
     except Exception as E:
         print("Error occurred on: DROP INDEX articles_search_vector_idx")
         print(E)
+        raise E
 
     try:
         result = connection.execute(text("""
@@ -338,6 +394,7 @@ def update_indexes(connection):
     except Exception as E:
         print("Error occurred on: CREATE INDEX articles_search_vector_idx ON articles USING gin(search_vector)")
         print(E)
+        raise E
 
 
 @click.command()
