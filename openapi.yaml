@@ -1,18 +1,19 @@
 openapi: 3.0.3
 info:
-  title: Servicio web - Periódicos v1.0 
-  description: |-
-    Servicio web para consumir datos de periódicos. Sitio web [https://api.periodicos.rmgss.net](api.periodicos.rmgss.net). Servicio desarrollador por Waynalabs 2023 - [Código fuente](https://github.com/waynalabs/periodicos-ws).
-   
+  title: Servicio web - Periódicos v1.0
+  description: >-
+    Servicio web para consumir datos de periódicos. Sitio web
+    [https://api.periodicos.rmgss.net](api.periodicos.rmgss.net). Servicio
+    desarrollador por Waynalabs 2023 - [Código
+    fuente](https://github.com/waynalabs/periodicos-ws).
   contact:
     email: rgarcia@laotra.red
   license:
     name: Licencia AGPL v3
-    url: https://www.gnu.org/licenses/agpl-3.0.en.html
-  version: "1.0"
-
+    url: 'https://www.gnu.org/licenses/agpl-3.0.en.html'
+  version: '1.0'
 servers:
-  - url: https://api.periodicos.rmgss.net/api/
+  - url: 'https://api.periodicos.rmgss.net/api/'
 tags:
   - name: newspapers
     description: Información general de periódicos.
@@ -31,7 +32,9 @@ tags:
   - name: top categories by month
     description: Las tres categorías con más artículos por cada mes por cada periódico.
   - name: top authors by month
-    description: Los tres autores que escribieron la mayor cantidad de artículos cada mes por periódico.
+    description: >-
+      Los tres autores que escribieron la mayor cantidad de artículos cada mes
+      por periódico.
   - name: full text search
     description: Busca el texto dado en todos los artículos
   - name: named entity search
@@ -71,20 +74,24 @@ paths:
             example: El Deber
         - name: startDate
           in: query
-          description: Para devolver detalles **sólo a partir** de esta fecha. Formato `AAAA/MM/DD`
+          description: >-
+            Para devolver detalles **sólo a partir** de esta fecha. Formato
+            `AAAA/MM/DD`
           required: false
           explode: false
           schema:
             type: string
-            example: "2017-01-01"
+            example: '2017-01-01'
         - name: endDate
           in: query
-          description: Para devolver detalles **sólo hasta** esta fecha. Formato `AAAA/MM/DD`
+          description: >-
+            Para devolver detalles **sólo hasta** esta fecha. Formato
+            `AAAA/MM/DD`
           required: false
           explode: false
           schema:
             type: string
-            example: "2020-01-01"
+            example: '2020-01-01'
       responses:
         '200':
           description: Detalles de periódico
@@ -93,7 +100,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Newspaper'          
+                  $ref: '#/components/schemas/Newspaper'
         '400':
           description: Invalid status value
         '404':
@@ -103,7 +110,7 @@ paths:
       tags:
         - articles
       summary: Datos generales de artículos de noticias.
-      description:  Artículos para un periódico y rango de fechas dadas.
+      description: Artículos para un periódico y rango de fechas dadas.
       operationId: articles
       parameters:
         - name: name
@@ -116,20 +123,24 @@ paths:
             example: El Deber
         - name: startDate
           in: query
-          description: Para devolver detalles **sólo a partir** de esta fecha. Formato `AAAA/MM/DD`
+          description: >-
+            Para devolver detalles **sólo a partir** de esta fecha. Formato
+            `AAAA/MM/DD`
           required: false
           explode: false
           schema:
             type: string
-            example: "2017-01-01"
+            example: '2017-01-01'
         - name: endDate
           in: query
-          description: Para devolver detalles **sólo hasta** esta fecha. Formato `AAAA/MM/DD`
+          description: >-
+            Para devolver detalles **sólo hasta** esta fecha. Formato
+            `AAAA/MM/DD`
           required: false
           explode: false
           schema:
             type: string
-            example: "2020-01-01"
+            example: '2020-01-01'
         - name: limit
           in: query
           description: Limita el número de resultados
@@ -140,7 +151,7 @@ paths:
             example: 1000
         - name: offset
           in: query
-          description: Desplazamiento, para devolver resultados a partir de este valor.
+          description: 'Desplazamiento, para devolver resultados a partir de este valor.'
           required: false
           schema:
             type: integer
@@ -151,7 +162,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Articles'          
+                $ref: '#/components/schemas/Articles'
         '400':
           description: Invalid ID supplied
         '404':
@@ -185,7 +196,9 @@ paths:
       tags:
         - author search
       summary: Búsqueda de autor por nombre.
-      description: Se busca un autor en toda la base de datos para devolver posibles coincidencias.
+      description: >-
+        Se busca un autor en toda la base de datos para devolver posibles
+        coincidencias.
       operationId: authorSearch
       parameters:
         - name: name
@@ -205,7 +218,7 @@ paths:
             example: 10
         - name: offset
           in: query
-          description: Desplazamiento, para devolver resultados a partir de este valor.
+          description: 'Desplazamiento, para devolver resultados a partir de este valor.'
           required: false
           schema:
             type: integer
@@ -222,9 +235,11 @@ paths:
   /articlesCountByDay:
     get:
       tags:
-        - count
+        - articles count by day
       summary: Retorna el conteo de artículos por cada día de todos los periódicos.
-      description: Dada una fecha de inicio y finalización, retorna el conteo de los artículos publicados por periódico y día.
+      description: >-
+        Dada una fecha de inicio y finalización, retorna el conteo de los
+        artículos publicados por periódico y día.
       operationId: articlesCountByDay
       parameters:
         - name: startDate
@@ -233,7 +248,7 @@ paths:
           explode: false
           schema:
             type: string
-            example: "2019-01-01"
+            example: '2019-01-01'
         - name: endDate
           in: query
           description: Para devolver resultados **hasta** esta fecha. Formato `AAAA/MM/DD`
@@ -241,7 +256,7 @@ paths:
           explode: false
           schema:
             type: string
-            example: "2020-01-01"
+            example: '2020-01-01'
       responses:
         '200':
           description: Conteo de artículos
@@ -249,12 +264,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArticlesCountByDayResponse'
+        '400':
+          description: Invalid input
   /topCategoriesByMonth:
     get:
       tags:
         - top categories by month
-      summary: Las tres categorías con más aartículos por cada mes de in periódico particular.
-      description: Dada una fecha de inicio y finalizacíon, retorna un conteo con las tres categorías con más artículos por cada mes de un periódico dado.
+      summary: >-
+        Las tres categorías con más aartículos por cada mes de in periódico
+        particular.
+      description: >-
+        Dada una fecha de inicio y finalizacíon, retorna un conteo con las tres
+        categorías con más artículos por cada mes de un periódico dado.
       operationId: topCategoriesByMonth
       parameters:
         - name: newspaper
@@ -271,7 +292,7 @@ paths:
           explode: false
           schema:
             type: string
-            example: "2019-01-01"
+            example: '2019-01-01'
         - name: endDate
           in: query
           description: Para devolver resultados **hasta** esta fecha. Formato `AAAA/MM/DD`
@@ -279,7 +300,15 @@ paths:
           explode: false
           schema:
             type: string
-            example: "2020-01-01"
+            example: '2020-01-01'
+        - name: number
+          in: query
+          description: Para devolver un top con este número de elementos por mes. Válido de 1 a 5.
+          required: false
+          explode: false
+          schema:
+            type: integer
+            example: 3
       responses:
         '200':
           description: Conteno de categorías por mes
@@ -293,8 +322,12 @@ paths:
     get:
       tags:
         - top authors by month
-      summary: Los tres autores con más aartículos por cada mes de in periódico particular.
-      description: Dada una fecha de inicio y finalizacíon, retorna un conteo con los tres autores con más artículos por cada mes de un periódico dado.
+      summary: >-
+        Los tres autores con más aartículos por cada mes de in periódico
+        particular.
+      description: >-
+        Dada una fecha de inicio y finalizacíon, retorna un conteo con los tres
+        autores con más artículos por cada mes de un periódico dado.
       operationId: topAuthorsByMonth
       parameters:
         - name: newspaper
@@ -311,7 +344,7 @@ paths:
           explode: false
           schema:
             type: string
-            example: "2019-01-01"
+            example: '2019-01-01'
         - name: endDate
           in: query
           description: Para devolver resultados **hasta** esta fecha. Formato `AAAA/MM/DD`
@@ -319,7 +352,15 @@ paths:
           explode: false
           schema:
             type: string
-            example: "2020-01-01"
+            example: '2020-01-01'
+        - name: number
+          in: query
+          description: Para devolver un top con este número de elementos por mes. Válido de 1 a 5.
+          required: false
+          explode: false
+          schema:
+            type: integer
+            example: 3
       responses:
         '200':
           description: Conteno de autores por mes
@@ -334,19 +375,25 @@ paths:
       tags:
         - full text search
       summary: Búsqueda de texto en todos los artículos.
-      description: Realiza una búsqueda rápida del texto solicitado en todos los artículos. Los artículos encontrados se ordenan de mayor a menor por el mejor puntaje de aciertos.
+      description: >-
+        Realiza una búsqueda rápida del texto solicitado en todos los artículos.
+        Los artículos encontrados se ordenan de mayor a menor por el mejor
+        puntaje de aciertos.
       operationId: fullTextSearch
       parameters:
         - name: searchText
           in: query
-          description: Texto a buscar en todos los artículos, entre 3 a 750 caracteres.
+          description: 'Texto a buscar en todos los artículos, entre 3 a 750 caracteres.'
           required: true
           schema:
             type: string
             example: Zarate Willca
         - name: rate
           in: query
-          description: Puntaje de acierto mínimo requerido, por defecto es 9. Este número entre 1 y 100 sirve para filtrar artículos que tengan al menos ese porcentaje de aciertos en la búsqueda del texto dado.
+          description: >-
+            Puntaje de acierto mínimo requerido, por defecto es 9. Este número
+            entre 1 y 100 sirve para filtrar artículos que tengan al menos ese
+            porcentaje de aciertos en la búsqueda del texto dado.
           required: false
           schema:
             type: integer
@@ -361,12 +408,11 @@ paths:
             example: 1000
         - name: offset
           in: query
-          description: Desplazamiento, para devolver resultados a partir de este valor.
+          description: 'Desplazamiento, para devolver resultados a partir de este valor.'
           required: false
           schema:
             type: integer
             example: 0
-
       responses:
         '200':
           description: Entidades o nombres encontrados
@@ -401,7 +447,7 @@ paths:
             example: 1000
         - name: offset
           in: query
-          description: Desplazamiento, para devolver resultados a partir de este valor.
+          description: 'Desplazamiento, para devolver resultados a partir de este valor.'
           required: false
           schema:
             type: integer
@@ -440,7 +486,7 @@ paths:
             example: 1000
         - name: offset
           in: query
-          description: Desplazamiento, para devolver resultados a partir de este valor.
+          description: 'Desplazamiento, para devolver resultados a partir de este valor.'
           required: false
           schema:
             type: integer
@@ -475,11 +521,11 @@ components:
                 example: El Deber
               min_date:
                 type: string
-                example: "2015-01-01"
+                example: '2015-01-01'
                 description: Formato `AAAA/MM/DD`
               max_date:
                 type: string
-                example: "2023-04-18"
+                example: '2023-04-18'
                 description: Formato `AAAA/MM/DD`
     Newspaper:
       type: object
@@ -503,7 +549,7 @@ components:
           type: array
           items:
             type: string
-            example: 
+            example:
               - bbc mundo
               - diego seas
               - leyla mendieta
@@ -514,7 +560,7 @@ components:
           type: array
           items:
             type: string
-            example: 
+            example:
               - acero
               - minerales
               - minería
@@ -542,10 +588,12 @@ components:
                 example: 31638
               title:
                 type: string
-                example: "Casa Blanca niega que Trump haya sido informado de recompensas rusas a los talibanes"
+                example: >-
+                  Casa Blanca niega que Trump haya sido informado de recompensas
+                  rusas a los talibanes
               date_published:
                 type: string
-                example: "2020-06-27"
+                example: '2020-06-27'
                 description: Formato `AAAA/MM/DD`
     Article:
       type: object
@@ -561,22 +609,26 @@ components:
           example: Las esponjas también ‘estornudan’ para eliminar residuos
         url:
           type: string
-          example: https://www.la-razon.com/la-revista/2022/08/11/las-esponjas-tambien-estornudan-para-eliminar-residuos/
+          example: >-
+            https://www.la-razon.com/la-revista/2022/08/11/las-esponjas-tambien-estornudan-para-eliminar-residuos/
         content_length:
           type: integer
           example: 2538
         description:
           type: string
-          example: El trabajo registró el comportamiento de ‘estornudo’ en dos especies de esponjas, la esponja tubular caribeña Aplysina archeri y otra especie indopacífica del género Chelonaplysilla.
+          example: >-
+            El trabajo registró el comportamiento de ‘estornudo’ en dos especies
+            de esponjas, la esponja tubular caribeña Aplysina archeri y otra
+            especie indopacífica del género Chelonaplysilla.
         date_published:
           type: string
-          example: 2022-08-11
+          example: '2022-08-11T00:00:00.000Z'
           description: Formato `AAAA/MM/DD`
         categories:
           type: array
           items:
             type: string
-            example: 
+            example:
               - eliminan
               - esponja
               - estornudo
@@ -584,7 +636,7 @@ components:
           type: array
           items:
             type: string
-            example: 
+            example:
               - juan valencia
     AuthorSearchResponse:
       type: object
@@ -640,26 +692,29 @@ components:
               title:
                 type: string
                 description: Título del artículo
-                example: Presidente de la ABC reaparece y exige disculpas a Héctor Arce; este dice que buscan cerrar el caso
+                example: >-
+                  Presidente de la ABC reaparece y exige disculpas a Héctor
+                  Arce; este dice que buscan cerrar el caso
               url:
                 type: string
                 description: Enlace al artículo
-                example: https://eldeber.com.bo/pais/presidente-de-la-abc-reaparece-y-exige-disculpas-a-hector-arce-este-dice-que-buscan-cerrar-el-caso_320429
+                example: >-
+                  https://eldeber.com.bo/pais/presidente-de-la-abc-reaparece-y-exige-disculpas-a-hector-arce-este-dice-que-buscan-cerrar-el-caso_320429
               date_published:
                 type: string
                 description: Fecha de publicación del artículo. Formato `YYYY-MM-DD`
-                example: "2023-04-04"
+                example: '2023-04-04'
     TopCategoriesByMonthResponse:
       type: object
       properties:
         start_date:
           type: string
           description: Fecha de inicio de la consulta. Formato `YYYY-MM-DD`
-          example: "2020-01-01"
+          example: '2020-01-01'
         end_date:
           type: string
           description: Fecha de finalización de la consulta. Formato `YYYY-MM-DD`
-          example: "2021-01-01"
+          example: '2021-01-01'
         results:
           type: array
           items:
@@ -679,19 +734,21 @@ components:
                 example: nacional
               category_count:
                 type: number
-                description: Número de artículos que pertenecen a la categoría en el mes y año.
+                description: >-
+                  Número de artículos que pertenecen a la categoría en el mes y
+                  año.
                 example: 272
-    TopCategoriesByMonthResponse:
+    TopAuthorsByMonthResponse:
       type: object
       properties:
         start_date:
           type: string
           description: Fecha de inicio de la consulta. Formato `YYYY-MM-DD`
-          example: "2020-01-01"
+          example: '2020-01-01'
         end_date:
           type: string
           description: Fecha de finalización de la consulta. Formato `YYYY-MM-DD`
-          example: "2021-01-01"
+          example: '2021-01-01'
         results:
           type: array
           items:
@@ -711,7 +768,9 @@ components:
                 example: nacional
               category_count:
                 type: number
-                description: Número de artículos que pertenecen a la categoría en el mes y año.
+                description: >-
+                  Número de artículos que pertenecen a la categoría en el mes y
+                  año.
                 example: 272
     ArticlesCountByDayResponse:
       type: object
@@ -719,11 +778,11 @@ components:
         start_date:
           type: string
           description: Fecha de inicio de la consulta. Formato `YYYY-MM-DD`
-          example: "2020-01-01"
+          example: '2020-01-01'
         end_date:
           type: string
           description: Fecha de finalización de la consulta. Formato `YYYY-MM-DD`
-          example: "2021-01-01"
+          example: '2021-01-01'
         results:
           type: array
           items:
@@ -736,7 +795,7 @@ components:
               date_published:
                 type: string
                 description: Día en formato `YYYY-MM-DD`
-                example: 2021-09-09
+                example: '2021-09-09T00:00:00.000Z'
               count:
                 type: integer
                 description: Cantidad de artículos publicados en ese día
@@ -746,7 +805,10 @@ components:
       properties:
         min_rate:
           type: integer
-          description: Puntaje de acierto mínimo requerido, por defecto es 9. Este número entre 1 y 100 sirve para filtrar artículos que tengan al menos ese porcentaje de aciertos en la búsqueda del texto dado.
+          description: >-
+            Puntaje de acierto mínimo requerido, por defecto es 9. Este número
+            entre 1 y 100 sirve para filtrar artículos que tengan al menos ese
+            porcentaje de aciertos en la búsqueda del texto dado.
           example: 9
         total:
           type: integer
@@ -771,13 +833,16 @@ components:
                 example: 21427
               title:
                 type: string
-                example: Quién fue el 'Temible' Zarate Willca y por qué Sucre rechaza que figure en el billete de Bs 50"
+                example: >-
+                  Quién fue el 'Temible' Zarate Willca y por qué Sucre rechaza
+                  que figure en el billete de Bs 50"
               url:
                 type: string
-                example: https://eldeber.com.bo/bolivia/quien-fue-el-temible-zarate-willca-y-por-que-sucre-rechaza-que-figure-en-el-billete-de-bs-50_16835
+                example: >-
+                  https://eldeber.com.bo/bolivia/quien-fue-el-temible-zarate-willca-y-por-que-sucre-rechaza-que-figure-en-el-billete-de-bs-50_16835
               date_published:
                 type: string
-                example: "2018-10-19"
+                example: '2018-10-19'
                 description: Formato `AAAA/MM/DD`
               rate:
                 type: number
@@ -811,14 +876,17 @@ components:
                 example: La CIDH aclara que no dio like a un tuit de Evo Morales
               url:
                 type: string
-                example: https://eldeber.com.bo/pais/la-cidh-aclara-que-no-dio-like-a-un-tuit-de-evo-morales_194118
+                example: >-
+                  https://eldeber.com.bo/pais/la-cidh-aclara-que-no-dio-like-a-un-tuit-de-evo-morales_194118
               date_published:
                 type: string
-                example: "2020-07-30"
+                example: '2020-07-30'
                 description: Formato `AAAA/MM/DD`
               ocurrences:
                 type: string
-                description: Número de veces que este nombre/entidad aparece en el campo específico del artículo.
+                description: >-
+                  Número de veces que este nombre/entidad aparece en el campo
+                  específico del artículo.
                 example: 1
               entity_type:
                 type: string
@@ -830,12 +898,13 @@ components:
                 example: PER
               article_field:
                 type: string
-                description: |-
-                  El nombre del campo en el artículo de noticias donde se encontró el nombre/entidad.
+                description: >-
+                  El nombre del campo en el artículo de noticias donde se
+                  encontró el nombre/entidad.
                 enum:
                   - content
                   - title
                   - description
               entity:
                 type: string
-                example: "Morales"
+                example: Morales

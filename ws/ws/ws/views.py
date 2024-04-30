@@ -425,6 +425,7 @@ class TopCategoriesByMonthAndNewspaper(views.APIView):
                                         .replace("'", "").replace("%", "")
         start_date = request.query_params.get("startDate", None)
         end_date = request.query_params.get("endDate", None)
+        number = request.query_params.get("number", 3)
 
         # TODO: Validate date params
 
@@ -433,6 +434,14 @@ class TopCategoriesByMonthAndNewspaper(views.APIView):
         if end_date is None:
             return customJsonResponse(400, "Must specify endDate in YYYY-MM-DD format")
 
+        rank_number = 3
+        try:
+            rank_number = int(number)
+            if rank_number < 1 or rank_number > 5:
+                return customJsonResponse(400, "number should be between 1 to 5")
+        except:
+            return customJsonResponse(400, "number should be a valid integer")
+        
         where_statement = f"""
           date_published >= '{start_date}' AND date_published < '{end_date}'
           AND n.name = '{newspaper}'
@@ -467,7 +476,7 @@ class TopCategoriesByMonthAndNewspaper(views.APIView):
         FROM ranked_categories rc
         	JOIN newspapers n ON rc.newspaper_id = n.id
         	JOIN categories c ON  rc.category_name = c.name
-        WHERE rc.cat_rank <= 3
+        WHERE rc.cat_rank <= {rank_number}
         ORDER BY rc.yrm DESC;            
         """
         try:
@@ -491,6 +500,7 @@ class TopAuthorsByMonthAndNewspaper(views.APIView):
                                         .replace("'", "").replace("%", "")
         start_date = request.query_params.get("startDate", None)
         end_date = request.query_params.get("endDate", None)
+        number = request.query_params.get("number", 3)
 
         # TODO: Validate date params
 
@@ -499,6 +509,14 @@ class TopAuthorsByMonthAndNewspaper(views.APIView):
         if end_date is None:
             return customJsonResponse(400, "Must specify endDate in YYYY-MM-DD format")
 
+        rank_number = 3
+        try:
+            rank_number = int(number)
+            if rank_number < 1 or rank_number > 5:
+                return customJsonResponse(400, "number should be between 1 to 5")
+        except:
+            return customJsonResponse(400, "number should be a valid integer")
+        
         where_statement = f"""
           au.name is not null AND
           date_published >= '{start_date}' AND date_published < '{end_date}'
@@ -533,7 +551,7 @@ class TopAuthorsByMonthAndNewspaper(views.APIView):
             FROM ranked_authors rc
         	JOIN newspapers n ON rc.newspaper_id = n.id
         	JOIN authors a ON  rc.author_name = a.name
-            WHERE rc.author_rank <= 3
+            WHERE rc.author_rank <= {rank_number}
         ORDER BY rc.yrm DESC     
         """
         try:

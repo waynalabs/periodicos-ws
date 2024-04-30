@@ -316,17 +316,6 @@ def update_indexes(connection):
             """))
         min_max_results = result.all()
         print(result.all())
-        # Retorna
-        # [(datetime.date(2024, 3, 19), datetime.date(2015, 1, 1), 1),
-        # (datetime.date(2023, 10, 27), datetime.date(2018, 8, 23), 2),
-        # (datetime.date(2023, 12, 2), datetime.date(2022, 5, 9), 3)]
-
-        
-        # Updating max min from newspapers
-        # result = connection.execute(
-        #     select(func.max(Articles.date_published), Articles.newspaper_id)) \
-        #     .group_by(Articles.newspaper_id)
-        # print("-----")
     except Exception as E:
         print("Error updating newspapers min max")
         print(E)

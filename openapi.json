@@ -422,6 +422,17 @@
               "type": "string",
               "example": "2020-01-01"
             }
+          },
+          {
+            "name": "number",
+            "in": "query",
+            "description": "Para devolver un top con este número de elementos por mes. Válido de 1 a 5.",
+            "required": false,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "example": 3
+            }
           }
         ],
         "responses": {
@@ -480,6 +491,17 @@
             "schema": {
               "type": "string",
               "example": "2020-01-01"
+            }
+          },
+          {
+            "name": "number",
+            "in": "query",
+            "description": "Para devolver un top con este número de elementos por mes. Válido de 1 a 5.",
+            "required": false,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "example": 3
             }
           }
         ],
