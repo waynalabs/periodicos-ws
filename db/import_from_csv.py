@@ -243,7 +243,7 @@ def perform_ner_count(connection):
     inserted = 0
     for newspaper_name in datafiles_for_data_apps.keys():
         print(f"Processing for {newspaper_name}**")
-        for ner_count_file in datafiles_for_data_apps[newspaper_name]["ner_count_names"]:
+        for i, ner_count_file in enumerate(datafiles_for_data_apps[newspaper_name]["ner_count_names"]):
             print(f"File {ner_count_file}------")
             df_nercount = pd.read_csv(ner_count_file)
 
@@ -272,13 +272,18 @@ def perform_ner_count(connection):
                         continue
 
                 # Verificando que registro no existe
-                result = connection.execute(select(NerCount).
-                                            where(NerCount.article_id == article_id).
-                                            where(NerCount.entity == row["entity"]).
-                                            where(NerCount.article_field == article_field))
-                if len(result.all()) > 0:
-                    skipped += 1
-                    continue
+                try:
+                    result = connection.execute(select(NerCount).
+                                                where(NerCount.article_id == article_id).
+                                                where(NerCount.entity == row["entity"]).
+                                                where(NerCount.article_field == article_field))
+                    if len(result.all()) > 0:
+                        skipped += 1
+                        continue
+                except Exception as E:
+                    print(f"Error searching existing ner count: {article_id} - {article_field}")
+                    print(E)
+                    pass
 
                 # insertando registro
                 try:

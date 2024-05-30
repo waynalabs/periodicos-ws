@@ -57,7 +57,31 @@ ALTER USER postgres WITH ENCRYPTED PASSWORD 'U1nP4as5-W@$ord';
 
 Para que la búsqueda de texto funcione correctamente se debería tener la base de datos en Locale `ES_es.utf8` y este locale debería estar previamente instalado en el sistema. Se puede crear la BD con este locale con:
 
+1. Generar locales en el S.O. en debian 12 es con
+
+```sh
+sudo dpkg-reconfigure locales
+# seleccionar es_BO.UTF-8 UTF-8
 ```
+
+2. Verificar que esta correctamente generado con `locale -a` debería mostrarse algo así:
+
+```
+C
+C.utf8
+en_US.utf8
+es_BO.utf8
+es_ES.utf8
+es_MX.utf8
+POSIX
+```
+
+
+
+```
+CREATE DATABASE "periodicos" WITH OWNER "postgres" ENCODING 'UTF8' LC_COLLATE = 'es_ES.UTF-8' LC_CTYPE = 'es_ES.UTF-8' TEMPLATE template0;
+
+-- o quiza
 CREATE DATABASE periodicos LOCALE 'es_ES.utf8' LC_CTYPE 'es_ES.utf8' LC_COLLATE 'es_ES.utf8' TEMPLATE template0;
 ```
 
